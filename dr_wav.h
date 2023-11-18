@@ -150,67 +150,67 @@ extern "C" {
 #include <stddef.h> /* For size_t. */
 
 /* Sized types. */
-typedef signed char drwav_int8;
-typedef unsigned char drwav_uint8;
-typedef signed short drwav_int16;
-typedef unsigned short drwav_uint16;
-typedef signed int drwav_int32;
-typedef unsigned int drwav_uint32;
+typedef   signed char           drwav_int8;
+typedef unsigned char           drwav_uint8;
+typedef   signed short          drwav_int16;
+typedef unsigned short          drwav_uint16;
+typedef   signed int            drwav_int32;
+typedef unsigned int            drwav_uint32;
 #if defined(_MSC_VER)
-typedef   signed __int64    drwav_int64;
-typedef unsigned __int64    drwav_uint64;
+    typedef   signed __int64    drwav_int64;
+    typedef unsigned __int64    drwav_uint64;
 #else
-#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wlong-long"
-#if defined(__clang__)
-#pragma GCC diagnostic ignored "-Wc++11-long-long"
-#endif
-#endif
-typedef signed long long drwav_int64;
-typedef unsigned long long drwav_uint64;
-#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
-#pragma GCC diagnostic pop
-#endif
+    #if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wlong-long"
+        #if defined(__clang__)
+            #pragma GCC diagnostic ignored "-Wc++11-long-long"
+        #endif
+    #endif
+    typedef   signed long long  drwav_int64;
+    typedef unsigned long long  drwav_uint64;
+    #if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
+        #pragma GCC diagnostic pop
+    #endif
 #endif
 #if defined(__LP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__)) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-typedef drwav_uint64 drwav_uintptr;
+    typedef drwav_uint64        drwav_uintptr;
 #else
-typedef drwav_uint32        drwav_uintptr;
+    typedef drwav_uint32        drwav_uintptr;
 #endif
-typedef drwav_uint8 drwav_bool8;
-typedef drwav_uint32 drwav_bool32;
+typedef drwav_uint8             drwav_bool8;
+typedef drwav_uint32            drwav_bool32;
 #define DRWAV_TRUE              1
 #define DRWAV_FALSE             0
 
 #if !defined(DRWAV_API)
-#if defined(DRWAV_DLL)
-#if defined(_WIN32)
-#define DRWAV_DLL_IMPORT  __declspec(dllimport)
-#define DRWAV_DLL_EXPORT  __declspec(dllexport)
-#define DRWAV_DLL_PRIVATE static
-#else
-#if defined(__GNUC__) && __GNUC__ >= 4
-#define DRWAV_DLL_IMPORT  __attribute__((visibility("default")))
-#define DRWAV_DLL_EXPORT  __attribute__((visibility("default")))
-#define DRWAV_DLL_PRIVATE __attribute__((visibility("hidden")))
-#else
-#define DRWAV_DLL_IMPORT
-#define DRWAV_DLL_EXPORT
-#define DRWAV_DLL_PRIVATE static
-#endif
-#endif
+    #if defined(DRWAV_DLL)
+        #if defined(_WIN32)
+            #define DRWAV_DLL_IMPORT  __declspec(dllimport)
+            #define DRWAV_DLL_EXPORT  __declspec(dllexport)
+            #define DRWAV_DLL_PRIVATE static
+        #else
+            #if defined(__GNUC__) && __GNUC__ >= 4
+                #define DRWAV_DLL_IMPORT  __attribute__((visibility("default")))
+                #define DRWAV_DLL_EXPORT  __attribute__((visibility("default")))
+                #define DRWAV_DLL_PRIVATE __attribute__((visibility("hidden")))
+            #else
+                #define DRWAV_DLL_IMPORT
+                #define DRWAV_DLL_EXPORT
+                #define DRWAV_DLL_PRIVATE static
+            #endif
+        #endif
 
-#if defined(DR_WAV_IMPLEMENTATION) || defined(DRWAV_IMPLEMENTATION)
-#define DRWAV_API  DRWAV_DLL_EXPORT
-#else
-#define DRWAV_API  DRWAV_DLL_IMPORT
-#endif
-#define DRWAV_PRIVATE DRWAV_DLL_PRIVATE
-#else
-#define DRWAV_API extern
-#define DRWAV_PRIVATE static
-#endif
+        #if defined(DR_WAV_IMPLEMENTATION) || defined(DRWAV_IMPLEMENTATION)
+            #define DRWAV_API  DRWAV_DLL_EXPORT
+        #else
+            #define DRWAV_API  DRWAV_DLL_IMPORT
+        #endif
+        #define DRWAV_PRIVATE DRWAV_DLL_PRIVATE
+    #else
+        #define DRWAV_API extern
+        #define DRWAV_PRIVATE static
+    #endif
 #endif
 
 typedef drwav_int32 drwav_result;
@@ -286,76 +286,81 @@ typedef drwav_int32 drwav_result;
 /* Flags to pass into drwav_init_ex(), etc. */
 #define DRWAV_SEQUENTIAL            0x00000001
 
-DRWAV_API void drwav_version(drwav_uint32 *pMajor, drwav_uint32 *pMinor, drwav_uint32 *pRevision);
-DRWAV_API const char *drwav_version_string(void);
+DRWAV_API void drwav_version(drwav_uint32* pMajor, drwav_uint32* pMinor, drwav_uint32* pRevision);
+DRWAV_API const char* drwav_version_string(void);
 
-typedef enum {
-  drwav_seek_origin_start,
-  drwav_seek_origin_current
+typedef enum
+{
+    drwav_seek_origin_start,
+    drwav_seek_origin_current
 } drwav_seek_origin;
 
-typedef enum {
-  drwav_container_riff,
-  drwav_container_w64,
-  drwav_container_rf64
+typedef enum
+{
+    drwav_container_riff,
+    drwav_container_w64,
+    drwav_container_rf64
 } drwav_container;
 
-typedef struct {
-  union {
-    drwav_uint8 fourcc[4];
-    drwav_uint8 guid[16];
-  } id;
+typedef struct
+{
+    union
+    {
+        drwav_uint8 fourcc[4];
+        drwav_uint8 guid[16];
+    } id;
 
-  /* The size in bytes of the chunk. */
-  drwav_uint64 sizeInBytes;
+    /* The size in bytes of the chunk. */
+    drwav_uint64 sizeInBytes;
 
-  /*
-  RIFF = 2 byte alignment.
-  W64  = 8 byte alignment.
-  */
-  unsigned int paddingSize;
+    /*
+    RIFF = 2 byte alignment.
+    W64  = 8 byte alignment.
+    */
+    unsigned int paddingSize;
 } drwav_chunk_header;
 
-typedef struct {
-  /*
-  The format tag exactly as specified in the wave file's "fmt" chunk. This can be used by applications
-  that require support for data formats not natively supported by dr_wav.
-  */
-  drwav_uint16 formatTag;
+typedef struct
+{
+    /*
+    The format tag exactly as specified in the wave file's "fmt" chunk. This can be used by applications
+    that require support for data formats not natively supported by dr_wav.
+    */
+    drwav_uint16 formatTag;
 
-  /* The number of channels making up the audio data. When this is set to 1 it is mono, 2 is stereo, etc. */
-  drwav_uint16 channels;
+    /* The number of channels making up the audio data. When this is set to 1 it is mono, 2 is stereo, etc. */
+    drwav_uint16 channels;
 
-  /* The sample rate. Usually set to something like 44100. */
-  drwav_uint32 sampleRate;
+    /* The sample rate. Usually set to something like 44100. */
+    drwav_uint32 sampleRate;
 
-  /* Average bytes per second. You probably don't need this, but it's left here for informational purposes. */
-  drwav_uint32 avgBytesPerSec;
+    /* Average bytes per second. You probably don't need this, but it's left here for informational purposes. */
+    drwav_uint32 avgBytesPerSec;
 
-  /* Block align. This is equal to the number of channels * bytes per sample. */
-  drwav_uint16 blockAlign;
+    /* Block align. This is equal to the number of channels * bytes per sample. */
+    drwav_uint16 blockAlign;
 
-  /* Bits per sample. */
-  drwav_uint16 bitsPerSample;
+    /* Bits per sample. */
+    drwav_uint16 bitsPerSample;
 
-  /* The size of the extended data. Only used internally for validation, but left here for informational purposes. */
-  drwav_uint16 extendedSize;
+    /* The size of the extended data. Only used internally for validation, but left here for informational purposes. */
+    drwav_uint16 extendedSize;
 
-  /*
-  The number of valid bits per sample. When <formatTag> is equal to WAVE_FORMAT_EXTENSIBLE, <bitsPerSample>
-  is always rounded up to the nearest multiple of 8. This variable contains information about exactly how
-  many bits are valid per sample. Mainly used for informational purposes.
-  */
-  drwav_uint16 validBitsPerSample;
+    /*
+    The number of valid bits per sample. When <formatTag> is equal to WAVE_FORMAT_EXTENSIBLE, <bitsPerSample>
+    is always rounded up to the nearest multiple of 8. This variable contains information about exactly how
+    many bits are valid per sample. Mainly used for informational purposes.
+    */
+    drwav_uint16 validBitsPerSample;
 
-  /* The channel mask. Not used at the moment. */
-  drwav_uint32 channelMask;
+    /* The channel mask. Not used at the moment. */
+    drwav_uint32 channelMask;
 
-  /* The sub-format, exactly as specified by the wave file. */
-  drwav_uint8 subFormat[16];
+    /* The sub-format, exactly as specified by the wave file. */
+    drwav_uint8 subFormat[16];
 } drwav_fmt;
 
-DRWAV_API drwav_uint16 drwav_fmt_get_format(const drwav_fmt *pFMT);
+DRWAV_API drwav_uint16 drwav_fmt_get_format(const drwav_fmt* pFMT);
 
 
 /*
@@ -370,7 +375,7 @@ Returns the number of bytes actually read.
 A return value of less than bytesToRead indicates the end of the stream. Do _not_ return from this callback until
 either the entire bytesToRead is filled or you have reached the end of the stream.
 */
-typedef size_t (*drwav_read_proc)(void *pUserData, void *pBufferOut, size_t bytesToRead);
+typedef size_t (* drwav_read_proc)(void* pUserData, void* pBufferOut, size_t bytesToRead);
 
 /*
 Callback for when data is written. Returns value is the number of bytes actually written.
@@ -383,7 +388,7 @@ Returns the number of bytes actually written.
 
 If the return value differs from bytesToWrite, it indicates an error.
 */
-typedef size_t (*drwav_write_proc)(void *pUserData, const void *pData, size_t bytesToWrite);
+typedef size_t (* drwav_write_proc)(void* pUserData, const void* pData, size_t bytesToWrite);
 
 /*
 Callback for when data needs to be seeked.
@@ -397,7 +402,7 @@ Returns whether or not the seek was successful.
 Whether or not it is relative to the beginning or current position is determined by the "origin" parameter which will be either drwav_seek_origin_start or
 drwav_seek_origin_current.
 */
-typedef drwav_bool32 (*drwav_seek_proc)(void *pUserData, int offset, drwav_seek_origin origin);
+typedef drwav_bool32 (* drwav_seek_proc)(void* pUserData, int offset, drwav_seek_origin origin);
 
 /*
 Callback for when drwav_init_ex() finds a chunk.
@@ -423,159 +428,164 @@ The `pFMT` parameter can be used to determine the data format of the wave file. 
 
 The read pointer will be sitting on the first byte after the chunk's header. You must not attempt to read beyond the boundary of the chunk.
 */
-typedef drwav_uint64 (*drwav_chunk_proc)(void *pChunkUserData, drwav_read_proc onRead, drwav_seek_proc onSeek,
-                                         void *pReadSeekUserData, const drwav_chunk_header *pChunkHeader,
-                                         drwav_container container, const drwav_fmt *pFMT);
+typedef drwav_uint64 (* drwav_chunk_proc)(void* pChunkUserData, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pReadSeekUserData, const drwav_chunk_header* pChunkHeader, drwav_container container, const drwav_fmt* pFMT);
 
-typedef struct {
-  void *pUserData;
-
-  void *(*onMalloc)(size_t sz, void *pUserData);
-
-  void *(*onRealloc)(void *p, size_t sz, void *pUserData);
-
-  void (*onFree)(void *p, void *pUserData);
+typedef struct
+{
+    void* pUserData;
+    void* (* onMalloc)(size_t sz, void* pUserData);
+    void* (* onRealloc)(void* p, size_t sz, void* pUserData);
+    void  (* onFree)(void* p, void* pUserData);
 } drwav_allocation_callbacks;
 
 /* Structure for internal use. Only used for loaders opened with drwav_init_memory(). */
-typedef struct {
-  const drwav_uint8 *data;
-  size_t dataSize;
-  size_t currentReadPos;
+typedef struct
+{
+    const drwav_uint8* data;
+    size_t dataSize;
+    size_t currentReadPos;
 } drwav__memory_stream;
 
 /* Structure for internal use. Only used for writers opened with drwav_init_memory_write(). */
-typedef struct {
-  void **ppData;
-  size_t *pDataSize;
-  size_t dataSize;
-  size_t dataCapacity;
-  size_t currentWritePos;
+typedef struct
+{
+    void** ppData;
+    size_t* pDataSize;
+    size_t dataSize;
+    size_t dataCapacity;
+    size_t currentWritePos;
 } drwav__memory_stream_write;
 
-typedef struct {
-  drwav_container container;  /* RIFF, W64. */
-  drwav_uint32 format;        /* DR_WAVE_FORMAT_* */
-  drwav_uint32 channels;
-  drwav_uint32 sampleRate;
-  drwav_uint32 bitsPerSample;
+typedef struct
+{
+    drwav_container container;  /* RIFF, W64. */
+    drwav_uint32 format;        /* DR_WAVE_FORMAT_* */
+    drwav_uint32 channels;
+    drwav_uint32 sampleRate;
+    drwav_uint32 bitsPerSample;
 } drwav_data_format;
 
 
 /* See the following for details on the 'smpl' chunk: https://sites.google.com/site/musicgapi/technical-documents/wav-file-format#smpl */
-typedef struct {
-  drwav_uint32 cuePointId;
-  drwav_uint32 type;
-  drwav_uint32 start;
-  drwav_uint32 end;
-  drwav_uint32 fraction;
-  drwav_uint32 playCount;
+typedef struct
+{
+    drwav_uint32 cuePointId;
+    drwav_uint32 type;
+    drwav_uint32 start;
+    drwav_uint32 end;
+    drwav_uint32 fraction;
+    drwav_uint32 playCount;
 } drwav_smpl_loop;
 
-typedef struct {
-  drwav_uint32 manufacturer;
-  drwav_uint32 product;
-  drwav_uint32 samplePeriod;
-  drwav_uint32 midiUnityNotes;
-  drwav_uint32 midiPitchFraction;
-  drwav_uint32 smpteFormat;
-  drwav_uint32 smpteOffset;
-  drwav_uint32 numSampleLoops;
-  drwav_uint32 samplerData;
-  drwav_smpl_loop loops[DRWAV_MAX_SMPL_LOOPS];
+ typedef struct
+{
+    drwav_uint32 manufacturer;
+    drwav_uint32 product;
+    drwav_uint32 samplePeriod;
+    drwav_uint32 midiUnityNotes;
+    drwav_uint32 midiPitchFraction;
+    drwav_uint32 smpteFormat;
+    drwav_uint32 smpteOffset;
+    drwav_uint32 numSampleLoops;
+    drwav_uint32 samplerData;
+    drwav_smpl_loop loops[DRWAV_MAX_SMPL_LOOPS];
 } drwav_smpl;
 
-typedef struct {
-  /* A pointer to the function to call when more data is needed. */
-  drwav_read_proc onRead;
+typedef struct
+{
+    /* A pointer to the function to call when more data is needed. */
+    drwav_read_proc onRead;
 
-  /* A pointer to the function to call when data needs to be written. Only used when the drwav object is opened in write mode. */
-  drwav_write_proc onWrite;
+    /* A pointer to the function to call when data needs to be written. Only used when the drwav object is opened in write mode. */
+    drwav_write_proc onWrite;
 
-  /* A pointer to the function to call when the wav file needs to be seeked. */
-  drwav_seek_proc onSeek;
+    /* A pointer to the function to call when the wav file needs to be seeked. */
+    drwav_seek_proc onSeek;
 
-  /* The user data to pass to callbacks. */
-  void *pUserData;
+    /* The user data to pass to callbacks. */
+    void* pUserData;
 
-  /* Allocation callbacks. */
-  drwav_allocation_callbacks allocationCallbacks;
-
-
-  /* Whether or not the WAV file is formatted as a standard RIFF file or W64. */
-  drwav_container container;
+    /* Allocation callbacks. */
+    drwav_allocation_callbacks allocationCallbacks;
 
 
-  /* Structure containing format information exactly as specified by the wav file. */
-  drwav_fmt fmt;
-
-  /* The sample rate. Will be set to something like 44100. */
-  drwav_uint32 sampleRate;
-
-  /* The number of channels. This will be set to 1 for monaural streams, 2 for stereo, etc. */
-  drwav_uint16 channels;
-
-  /* The bits per sample. Will be set to something like 16, 24, etc. */
-  drwav_uint16 bitsPerSample;
-
-  /* Equal to fmt.formatTag, or the value specified by fmt.subFormat if fmt.formatTag is equal to 65534 (WAVE_FORMAT_EXTENSIBLE). */
-  drwav_uint16 translatedFormatTag;
-
-  /* The total number of PCM frames making up the audio data. */
-  drwav_uint64 totalPCMFrameCount;
+    /* Whether or not the WAV file is formatted as a standard RIFF file or W64. */
+    drwav_container container;
 
 
-  /* The size in bytes of the data chunk. */
-  drwav_uint64 dataChunkDataSize;
+    /* Structure containing format information exactly as specified by the wav file. */
+    drwav_fmt fmt;
 
-  /* The position in the stream of the first byte of the data chunk. This is used for seeking. */
-  drwav_uint64 dataChunkDataPos;
+    /* The sample rate. Will be set to something like 44100. */
+    drwav_uint32 sampleRate;
 
-  /* The number of bytes remaining in the data chunk. */
-  drwav_uint64 bytesRemaining;
+    /* The number of channels. This will be set to 1 for monaural streams, 2 for stereo, etc. */
+    drwav_uint16 channels;
 
+    /* The bits per sample. Will be set to something like 16, 24, etc. */
+    drwav_uint16 bitsPerSample;
 
-  /*
-  Only used in sequential write mode. Keeps track of the desired size of the "data" chunk at the point of initialization time. Always
-  set to 0 for non-sequential writes and when the drwav object is opened in read mode. Used for validation.
-  */
-  drwav_uint64 dataChunkDataSizeTargetWrite;
+    /* Equal to fmt.formatTag, or the value specified by fmt.subFormat if fmt.formatTag is equal to 65534 (WAVE_FORMAT_EXTENSIBLE). */
+    drwav_uint16 translatedFormatTag;
 
-  /* Keeps track of whether or not the wav writer was initialized in sequential mode. */
-  drwav_bool32 isSequentialWrite;
-
-
-  /* smpl chunk. */
-  drwav_smpl smpl;
+    /* The total number of PCM frames making up the audio data. */
+    drwav_uint64 totalPCMFrameCount;
 
 
-  /* A hack to avoid a DRWAV_MALLOC() when opening a decoder with drwav_init_memory(). */
-  drwav__memory_stream memoryStream;
-  drwav__memory_stream_write memoryStreamWrite;
+    /* The size in bytes of the data chunk. */
+    drwav_uint64 dataChunkDataSize;
+    
+    /* The position in the stream of the first byte of the data chunk. This is used for seeking. */
+    drwav_uint64 dataChunkDataPos;
 
-  /* Generic data for compressed formats. This data is shared across all block-compressed formats. */
-  struct {
-    drwav_uint64 iCurrentPCMFrame;  /* The index of the next PCM frame that will be read by drwav_read_*(). This is used with "totalPCMFrameCount" to ensure we don't read excess samples at the end of the last block. */
-  } compressed;
+    /* The number of bytes remaining in the data chunk. */
+    drwav_uint64 bytesRemaining;
 
-  /* Microsoft ADPCM specific data. */
-  struct {
-    drwav_uint32 bytesRemainingInBlock;
-    drwav_uint16 predictor[2];
-    drwav_int32 delta[2];
-    drwav_int32 cachedFrames[4];  /* Samples are stored in this cache during decoding. */
-    drwav_uint32 cachedFrameCount;
-    drwav_int32 prevFrames[2][2]; /* The previous 2 samples for each channel (2 channels at most). */
-  } msadpcm;
 
-  /* IMA ADPCM specific data. */
-  struct {
-    drwav_uint32 bytesRemainingInBlock;
-    drwav_int32 predictor[2];
-    drwav_int32 stepIndex[2];
-    drwav_int32 cachedFrames[16]; /* Samples are stored in this cache during decoding. */
-    drwav_uint32 cachedFrameCount;
-  } ima;
+    /*
+    Only used in sequential write mode. Keeps track of the desired size of the "data" chunk at the point of initialization time. Always
+    set to 0 for non-sequential writes and when the drwav object is opened in read mode. Used for validation.
+    */
+    drwav_uint64 dataChunkDataSizeTargetWrite;
+
+    /* Keeps track of whether or not the wav writer was initialized in sequential mode. */
+    drwav_bool32 isSequentialWrite;
+
+
+    /* smpl chunk. */
+    drwav_smpl smpl;
+
+
+    /* A hack to avoid a DRWAV_MALLOC() when opening a decoder with drwav_init_memory(). */
+    drwav__memory_stream memoryStream;
+    drwav__memory_stream_write memoryStreamWrite;
+
+    /* Generic data for compressed formats. This data is shared across all block-compressed formats. */
+    struct
+    {
+        drwav_uint64 iCurrentPCMFrame;  /* The index of the next PCM frame that will be read by drwav_read_*(). This is used with "totalPCMFrameCount" to ensure we don't read excess samples at the end of the last block. */
+    } compressed;
+    
+    /* Microsoft ADPCM specific data. */
+    struct
+    {
+        drwav_uint32 bytesRemainingInBlock;
+        drwav_uint16 predictor[2];
+        drwav_int32  delta[2];
+        drwav_int32  cachedFrames[4];  /* Samples are stored in this cache during decoding. */
+        drwav_uint32 cachedFrameCount;
+        drwav_int32  prevFrames[2][2]; /* The previous 2 samples for each channel (2 channels at most). */
+    } msadpcm;
+
+    /* IMA ADPCM specific data. */
+    struct
+    {
+        drwav_uint32 bytesRemainingInBlock;
+        drwav_int32  predictor[2];
+        drwav_int32  stepIndex[2];
+        drwav_int32  cachedFrames[16]; /* Samples are stored in this cache during decoding. */
+        drwav_uint32 cachedFrameCount;
+    } ima;
 } drwav;
 
 
@@ -608,12 +618,8 @@ after the function returns.
 
 See also: drwav_init_file(), drwav_init_memory(), drwav_uninit()
 */
-DRWAV_API drwav_bool32 drwav_init(drwav *pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void *pUserData,
-                                  const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_ex(drwav *pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk,
-              void *pReadSeekUserData, void *pChunkUserData, drwav_uint32 flags,
-              const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk, void* pReadSeekUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 /*
 Initializes a pre-allocated drwav object for writing.
@@ -634,17 +640,9 @@ a post-processing step for storing the total sample count and the size of the da
 
 See also: drwav_init_file_write(), drwav_init_memory_write(), drwav_uninit()
 */
-DRWAV_API drwav_bool32
-drwav_init_write(drwav *pWav, const drwav_data_format *pFormat, drwav_write_proc onWrite, drwav_seek_proc onSeek,
-                 void *pUserData, const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_write_sequential(drwav *pWav, const drwav_data_format *pFormat, drwav_uint64 totalSampleCount,
-                            drwav_write_proc onWrite, void *pUserData,
-                            const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_write_sequential_pcm_frames(drwav *pWav, const drwav_data_format *pFormat, drwav_uint64 totalPCMFrameCount,
-                                       drwav_write_proc onWrite, void *pUserData,
-                                       const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_write(drwav* pWav, const drwav_data_format* pFormat, drwav_write_proc onWrite, drwav_seek_proc onSeek, void* pUserData, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_write_sequential(drwav* pWav, const drwav_data_format* pFormat, drwav_uint64 totalSampleCount, drwav_write_proc onWrite, void* pUserData, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_write_sequential_pcm_frames(drwav* pWav, const drwav_data_format* pFormat, drwav_uint64 totalPCMFrameCount, drwav_write_proc onWrite, void* pUserData, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 /*
 Utility function to determine the target size of the entire data to be written (including all headers and chunks).
@@ -657,14 +655,14 @@ Only writing to the RIFF chunk and one data chunk is currently supported.
 
 See also: drwav_init_write(), drwav_init_file_write(), drwav_init_memory_write()
 */
-DRWAV_API drwav_uint64 drwav_target_write_size_bytes(const drwav_data_format *pFormat, drwav_uint64 totalSampleCount);
+DRWAV_API drwav_uint64 drwav_target_write_size_bytes(const drwav_data_format* pFormat, drwav_uint64 totalSampleCount);
 
 /*
 Uninitializes the given drwav object.
 
 Use this only for objects initialized with drwav_init*() functions (drwav_init(), drwav_init_ex(), drwav_init_write(), drwav_init_write_sequential()).
 */
-DRWAV_API drwav_result drwav_uninit(drwav *pWav);
+DRWAV_API drwav_result drwav_uninit(drwav* pWav);
 
 
 /*
@@ -680,7 +678,7 @@ pBufferOut can be NULL in which case a seek will be performed.
 
 Returns the number of bytes actually read.
 */
-DRWAV_API size_t drwav_read_raw(drwav *pWav, size_t bytesToRead, void *pBufferOut);
+DRWAV_API size_t drwav_read_raw(drwav* pWav, size_t bytesToRead, void* pBufferOut);
 
 /*
 Reads up to the specified number of PCM frames from the WAV file.
@@ -696,16 +694,16 @@ using a compressed format consider using drwav_read_raw() or drwav_read_pcm_fram
 
 pBufferOut can be NULL in which case a seek will be performed.
 */
-DRWAV_API drwav_uint64 drwav_read_pcm_frames(drwav *pWav, drwav_uint64 framesToRead, void *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_le(drwav *pWav, drwav_uint64 framesToRead, void *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_be(drwav *pWav, drwav_uint64 framesToRead, void *pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames(drwav* pWav, drwav_uint64 framesToRead, void* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_le(drwav* pWav, drwav_uint64 framesToRead, void* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_be(drwav* pWav, drwav_uint64 framesToRead, void* pBufferOut);
 
 /*
 Seeks to the given PCM frame.
 
 Returns true if successful; false otherwise.
 */
-DRWAV_API drwav_bool32 drwav_seek_to_pcm_frame(drwav *pWav, drwav_uint64 targetFrameIndex);
+DRWAV_API drwav_bool32 drwav_seek_to_pcm_frame(drwav* pWav, drwav_uint64 targetFrameIndex);
 
 
 /*
@@ -713,7 +711,7 @@ Writes raw audio data.
 
 Returns the number of bytes actually written. If this differs from bytesToWrite, it indicates an error.
 */
-DRWAV_API size_t drwav_write_raw(drwav *pWav, size_t bytesToWrite, const void *pData);
+DRWAV_API size_t drwav_write_raw(drwav* pWav, size_t bytesToWrite, const void* pData);
 
 /*
 Writes PCM frames.
@@ -723,9 +721,9 @@ Returns the number of PCM frames written.
 Input samples need to be in native-endian byte order. On big-endian architectures the input data will be converted to
 little-endian. Use drwav_write_raw() to write raw audio data without performing any conversion.
 */
-DRWAV_API drwav_uint64 drwav_write_pcm_frames(drwav *pWav, drwav_uint64 framesToWrite, const void *pData);
-DRWAV_API drwav_uint64 drwav_write_pcm_frames_le(drwav *pWav, drwav_uint64 framesToWrite, const void *pData);
-DRWAV_API drwav_uint64 drwav_write_pcm_frames_be(drwav *pWav, drwav_uint64 framesToWrite, const void *pData);
+DRWAV_API drwav_uint64 drwav_write_pcm_frames(drwav* pWav, drwav_uint64 framesToWrite, const void* pData);
+DRWAV_API drwav_uint64 drwav_write_pcm_frames_le(drwav* pWav, drwav_uint64 framesToWrite, const void* pData);
+DRWAV_API drwav_uint64 drwav_write_pcm_frames_be(drwav* pWav, drwav_uint64 framesToWrite, const void* pData);
 
 
 /* Conversion Utilities */
@@ -740,30 +738,30 @@ Returns the number of PCM frames actually read.
 
 If the return value is less than <framesToRead> it means the end of the file has been reached.
 */
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16(drwav *pWav, drwav_uint64 framesToRead, drwav_int16 *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16le(drwav *pWav, drwav_uint64 framesToRead, drwav_int16 *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16be(drwav *pWav, drwav_uint64 framesToRead, drwav_int16 *pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16(drwav* pWav, drwav_uint64 framesToRead, drwav_int16* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16le(drwav* pWav, drwav_uint64 framesToRead, drwav_int16* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s16be(drwav* pWav, drwav_uint64 framesToRead, drwav_int16* pBufferOut);
 
 /* Low-level function for converting unsigned 8-bit PCM samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_u8_to_s16(drwav_int16 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_u8_to_s16(drwav_int16* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 24-bit PCM samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_s24_to_s16(drwav_int16 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s24_to_s16(drwav_int16* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 32-bit PCM samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_s32_to_s16(drwav_int16 *pOut, const drwav_int32 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s32_to_s16(drwav_int16* pOut, const drwav_int32* pIn, size_t sampleCount);
 
 /* Low-level function for converting IEEE 32-bit floating point samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_f32_to_s16(drwav_int16 *pOut, const float *pIn, size_t sampleCount);
+DRWAV_API void drwav_f32_to_s16(drwav_int16* pOut, const float* pIn, size_t sampleCount);
 
 /* Low-level function for converting IEEE 64-bit floating point samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_f64_to_s16(drwav_int16 *pOut, const double *pIn, size_t sampleCount);
+DRWAV_API void drwav_f64_to_s16(drwav_int16* pOut, const double* pIn, size_t sampleCount);
 
 /* Low-level function for converting A-law samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_alaw_to_s16(drwav_int16 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_alaw_to_s16(drwav_int16* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting u-law samples to signed 16-bit PCM samples. */
-DRWAV_API void drwav_mulaw_to_s16(drwav_int16 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_mulaw_to_s16(drwav_int16* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 
 /*
@@ -775,30 +773,30 @@ Returns the number of PCM frames actually read.
 
 If the return value is less than <framesToRead> it means the end of the file has been reached.
 */
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32(drwav *pWav, drwav_uint64 framesToRead, float *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32le(drwav *pWav, drwav_uint64 framesToRead, float *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32be(drwav *pWav, drwav_uint64 framesToRead, float *pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32(drwav* pWav, drwav_uint64 framesToRead, float* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32le(drwav* pWav, drwav_uint64 framesToRead, float* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_f32be(drwav* pWav, drwav_uint64 framesToRead, float* pBufferOut);
 
 /* Low-level function for converting unsigned 8-bit PCM samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_u8_to_f32(float *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_u8_to_f32(float* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 16-bit PCM samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_s16_to_f32(float *pOut, const drwav_int16 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s16_to_f32(float* pOut, const drwav_int16* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 24-bit PCM samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_s24_to_f32(float *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s24_to_f32(float* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 32-bit PCM samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_s32_to_f32(float *pOut, const drwav_int32 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s32_to_f32(float* pOut, const drwav_int32* pIn, size_t sampleCount);
 
 /* Low-level function for converting IEEE 64-bit floating point samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_f64_to_f32(float *pOut, const double *pIn, size_t sampleCount);
+DRWAV_API void drwav_f64_to_f32(float* pOut, const double* pIn, size_t sampleCount);
 
 /* Low-level function for converting A-law samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_alaw_to_f32(float *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_alaw_to_f32(float* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting u-law samples to IEEE 32-bit floating point samples. */
-DRWAV_API void drwav_mulaw_to_f32(float *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_mulaw_to_f32(float* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 
 /*
@@ -810,30 +808,30 @@ Returns the number of PCM frames actually read.
 
 If the return value is less than <framesToRead> it means the end of the file has been reached.
 */
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32(drwav *pWav, drwav_uint64 framesToRead, drwav_int32 *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32le(drwav *pWav, drwav_uint64 framesToRead, drwav_int32 *pBufferOut);
-DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32be(drwav *pWav, drwav_uint64 framesToRead, drwav_int32 *pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32(drwav* pWav, drwav_uint64 framesToRead, drwav_int32* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32le(drwav* pWav, drwav_uint64 framesToRead, drwav_int32* pBufferOut);
+DRWAV_API drwav_uint64 drwav_read_pcm_frames_s32be(drwav* pWav, drwav_uint64 framesToRead, drwav_int32* pBufferOut);
 
 /* Low-level function for converting unsigned 8-bit PCM samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_u8_to_s32(drwav_int32 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_u8_to_s32(drwav_int32* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 16-bit PCM samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_s16_to_s32(drwav_int32 *pOut, const drwav_int16 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s16_to_s32(drwav_int32* pOut, const drwav_int16* pIn, size_t sampleCount);
 
 /* Low-level function for converting signed 24-bit PCM samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_s24_to_s32(drwav_int32 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_s24_to_s32(drwav_int32* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting IEEE 32-bit floating point samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_f32_to_s32(drwav_int32 *pOut, const float *pIn, size_t sampleCount);
+DRWAV_API void drwav_f32_to_s32(drwav_int32* pOut, const float* pIn, size_t sampleCount);
 
 /* Low-level function for converting IEEE 64-bit floating point samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_f64_to_s32(drwav_int32 *pOut, const double *pIn, size_t sampleCount);
+DRWAV_API void drwav_f64_to_s32(drwav_int32* pOut, const double* pIn, size_t sampleCount);
 
 /* Low-level function for converting A-law samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_alaw_to_s32(drwav_int32 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_alaw_to_s32(drwav_int32* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 /* Low-level function for converting u-law samples to signed 32-bit PCM samples. */
-DRWAV_API void drwav_mulaw_to_s32(drwav_int32 *pOut, const drwav_uint8 *pIn, size_t sampleCount);
+DRWAV_API void drwav_mulaw_to_s32(drwav_int32* pOut, const drwav_uint8* pIn, size_t sampleCount);
 
 #endif  /* DR_WAV_NO_CONVERSION_API */
 
@@ -848,16 +846,10 @@ This holds the internal FILE object until drwav_uninit() is called. Keep this in
 objects because the operating system may restrict the number of file handles an application can have open at
 any given time.
 */
-DRWAV_API drwav_bool32
-drwav_init_file(drwav *pWav, const char *filename, const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_ex(drwav *pWav, const char *filename, drwav_chunk_proc onChunk, void *pChunkUserData,
-                   drwav_uint32 flags, const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_w(drwav *pWav, const wchar_t *filename, const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_ex_w(drwav *pWav, const wchar_t *filename, drwav_chunk_proc onChunk, void *pChunkUserData,
-                     drwav_uint32 flags, const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file(drwav* pWav, const char* filename, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_ex(drwav* pWav, const char* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_w(drwav* pWav, const wchar_t* filename, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 /*
 Helper for initializing a wave file for writing using stdio.
@@ -866,25 +858,12 @@ This holds the internal FILE object until drwav_uninit() is called. Keep this in
 objects because the operating system may restrict the number of file handles an application can have open at
 any given time.
 */
-DRWAV_API drwav_bool32 drwav_init_file_write(drwav *pWav, const char *filename, const drwav_data_format *pFormat,
-                                             const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_write_sequential(drwav *pWav, const char *filename, const drwav_data_format *pFormat,
-                                 drwav_uint64 totalSampleCount, const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_write_sequential_pcm_frames(drwav *pWav, const char *filename, const drwav_data_format *pFormat,
-                                            drwav_uint64 totalPCMFrameCount,
-                                            const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32 drwav_init_file_write_w(drwav *pWav, const wchar_t *filename, const drwav_data_format *pFormat,
-                                               const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_write_sequential_w(drwav *pWav, const wchar_t *filename, const drwav_data_format *pFormat,
-                                   drwav_uint64 totalSampleCount,
-                                   const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_file_write_sequential_pcm_frames_w(drwav *pWav, const wchar_t *filename, const drwav_data_format *pFormat,
-                                              drwav_uint64 totalPCMFrameCount,
-                                              const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write(drwav* pWav, const char* filename, const drwav_data_format* pFormat, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write_sequential(drwav* pWav, const char* filename, const drwav_data_format* pFormat, drwav_uint64 totalSampleCount, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write_sequential_pcm_frames(drwav* pWav, const char* filename, const drwav_data_format* pFormat, drwav_uint64 totalPCMFrameCount, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write_w(drwav* pWav, const wchar_t* filename, const drwav_data_format* pFormat, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write_sequential_w(drwav* pWav, const wchar_t* filename, const drwav_data_format* pFormat, drwav_uint64 totalSampleCount, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_file_write_sequential_pcm_frames_w(drwav* pWav, const wchar_t* filename, const drwav_data_format* pFormat, drwav_uint64 totalPCMFrameCount, const drwav_allocation_callbacks* pAllocationCallbacks);
 #endif  /* DR_WAV_NO_STDIO */
 
 /*
@@ -895,11 +874,8 @@ the lifetime of the drwav object.
 
 The buffer should contain the contents of the entire wave file, not just the sample data.
 */
-DRWAV_API drwav_bool32 drwav_init_memory(drwav *pWav, const void *data, size_t dataSize,
-                                         const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_memory_ex(drwav *pWav, const void *data, size_t dataSize, drwav_chunk_proc onChunk, void *pChunkUserData,
-                     drwav_uint32 flags, const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_memory(drwav* pWav, const void* data, size_t dataSize, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 /*
 Helper for initializing a writer which outputs data to a memory buffer.
@@ -909,17 +885,9 @@ dr_wav will manage the memory allocations, however it is up to the caller to fre
 The buffer will remain allocated even after drwav_uninit() is called. The buffer should not be considered valid
 until after drwav_uninit() has been called.
 */
-DRWAV_API drwav_bool32
-drwav_init_memory_write(drwav *pWav, void **ppData, size_t *pDataSize, const drwav_data_format *pFormat,
-                        const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32
-drwav_init_memory_write_sequential(drwav *pWav, void **ppData, size_t *pDataSize, const drwav_data_format *pFormat,
-                                   drwav_uint64 totalSampleCount,
-                                   const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_bool32 drwav_init_memory_write_sequential_pcm_frames(drwav *pWav, void **ppData, size_t *pDataSize,
-                                                                     const drwav_data_format *pFormat,
-                                                                     drwav_uint64 totalPCMFrameCount,
-                                                                     const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_memory_write(drwav* pWav, void** ppData, size_t* pDataSize, const drwav_data_format* pFormat, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_memory_write_sequential(drwav* pWav, void** ppData, size_t* pDataSize, const drwav_data_format* pFormat, drwav_uint64 totalSampleCount, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_bool32 drwav_init_memory_write_sequential_pcm_frames(drwav* pWav, void** ppData, size_t* pDataSize, const drwav_data_format* pFormat, drwav_uint64 totalPCMFrameCount, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 
 #ifndef DR_WAV_NO_CONVERSION_API
@@ -928,86 +896,48 @@ Opens and reads an entire wav file in a single operation.
 
 The return value is a heap-allocated buffer containing the audio data. Use drwav_free() to free the buffer.
 */
-DRWAV_API drwav_int16 *
-drwav_open_and_read_pcm_frames_s16(drwav_read_proc onRead, drwav_seek_proc onSeek, void *pUserData,
-                                   unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                   drwav_uint64 *totalFrameCountOut,
-                                   const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API float *drwav_open_and_read_pcm_frames_f32(drwav_read_proc onRead, drwav_seek_proc onSeek, void *pUserData,
-                                                    unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                                    drwav_uint64 *totalFrameCountOut,
-                                                    const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_int32 *
-drwav_open_and_read_pcm_frames_s32(drwav_read_proc onRead, drwav_seek_proc onSeek, void *pUserData,
-                                   unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                   drwav_uint64 *totalFrameCountOut,
-                                   const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_int16* drwav_open_and_read_pcm_frames_s16(drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API float* drwav_open_and_read_pcm_frames_f32(drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_int32* drwav_open_and_read_pcm_frames_s32(drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
 #ifndef DR_WAV_NO_STDIO
 /*
 Opens and decodes an entire wav file in a single operation.
 
 The return value is a heap-allocated buffer containing the audio data. Use drwav_free() to free the buffer.
 */
-DRWAV_API drwav_int16 *
-drwav_open_file_and_read_pcm_frames_s16(const char *filename, unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                        drwav_uint64 *totalFrameCountOut,
-                                        const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API float *
-drwav_open_file_and_read_pcm_frames_f32(const char *filename, unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                        drwav_uint64 *totalFrameCountOut,
-                                        const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_int32 *
-drwav_open_file_and_read_pcm_frames_s32(const char *filename, unsigned int *channelsOut, unsigned int *sampleRateOut,
-                                        drwav_uint64 *totalFrameCountOut,
-                                        const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_int16 *drwav_open_file_and_read_pcm_frames_s16_w(const wchar_t *filename, unsigned int *channelsOut,
-                                                                 unsigned int *sampleRateOut,
-                                                                 drwav_uint64 *totalFrameCountOut,
-                                                                 const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API float *drwav_open_file_and_read_pcm_frames_f32_w(const wchar_t *filename, unsigned int *channelsOut,
-                                                           unsigned int *sampleRateOut,
-                                                           drwav_uint64 *totalFrameCountOut,
-                                                           const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_int32 *drwav_open_file_and_read_pcm_frames_s32_w(const wchar_t *filename, unsigned int *channelsOut,
-                                                                 unsigned int *sampleRateOut,
-                                                                 drwav_uint64 *totalFrameCountOut,
-                                                                 const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_int16* drwav_open_file_and_read_pcm_frames_s16(const char* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API float* drwav_open_file_and_read_pcm_frames_f32(const char* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_int32* drwav_open_file_and_read_pcm_frames_s32(const char* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_int16* drwav_open_file_and_read_pcm_frames_s16_w(const wchar_t* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API float* drwav_open_file_and_read_pcm_frames_f32_w(const wchar_t* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_int32* drwav_open_file_and_read_pcm_frames_s32_w(const wchar_t* filename, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
 #endif
 /*
 Opens and decodes an entire wav file from a block of memory in a single operation.
 
 The return value is a heap-allocated buffer containing the audio data. Use drwav_free() to free the buffer.
 */
-DRWAV_API drwav_int16 *
-drwav_open_memory_and_read_pcm_frames_s16(const void *data, size_t dataSize, unsigned int *channelsOut,
-                                          unsigned int *sampleRateOut, drwav_uint64 *totalFrameCountOut,
-                                          const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API float *drwav_open_memory_and_read_pcm_frames_f32(const void *data, size_t dataSize, unsigned int *channelsOut,
-                                                           unsigned int *sampleRateOut,
-                                                           drwav_uint64 *totalFrameCountOut,
-                                                           const drwav_allocation_callbacks *pAllocationCallbacks);
-DRWAV_API drwav_int32 *
-drwav_open_memory_and_read_pcm_frames_s32(const void *data, size_t dataSize, unsigned int *channelsOut,
-                                          unsigned int *sampleRateOut, drwav_uint64 *totalFrameCountOut,
-                                          const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API drwav_int16* drwav_open_memory_and_read_pcm_frames_s16(const void* data, size_t dataSize, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API float* drwav_open_memory_and_read_pcm_frames_f32(const void* data, size_t dataSize, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
+DRWAV_API drwav_int32* drwav_open_memory_and_read_pcm_frames_s32(const void* data, size_t dataSize, unsigned int* channelsOut, unsigned int* sampleRateOut, drwav_uint64* totalFrameCountOut, const drwav_allocation_callbacks* pAllocationCallbacks);
 #endif
 
 /* Frees data that was allocated internally by dr_wav. */
-DRWAV_API void drwav_free(void *p, const drwav_allocation_callbacks *pAllocationCallbacks);
+DRWAV_API void drwav_free(void* p, const drwav_allocation_callbacks* pAllocationCallbacks);
 
 /* Converts bytes from a wav stream to a sized type of native endian. */
-DRWAV_API drwav_uint16 drwav_bytes_to_u16(const drwav_uint8 *data);
-DRWAV_API drwav_int16 drwav_bytes_to_s16(const drwav_uint8 *data);
-DRWAV_API drwav_uint32 drwav_bytes_to_u32(const drwav_uint8 *data);
-DRWAV_API drwav_int32 drwav_bytes_to_s32(const drwav_uint8 *data);
-DRWAV_API drwav_uint64 drwav_bytes_to_u64(const drwav_uint8 *data);
-DRWAV_API drwav_int64 drwav_bytes_to_s64(const drwav_uint8 *data);
+DRWAV_API drwav_uint16 drwav_bytes_to_u16(const drwav_uint8* data);
+DRWAV_API drwav_int16 drwav_bytes_to_s16(const drwav_uint8* data);
+DRWAV_API drwav_uint32 drwav_bytes_to_u32(const drwav_uint8* data);
+DRWAV_API drwav_int32 drwav_bytes_to_s32(const drwav_uint8* data);
+DRWAV_API drwav_uint64 drwav_bytes_to_u64(const drwav_uint8* data);
+DRWAV_API drwav_int64 drwav_bytes_to_s64(const drwav_uint8* data);
 
 /* Compares a GUID for the purpose of checking the type of a Wave64 chunk. */
 DRWAV_API drwav_bool32 drwav_guid_equal(const drwav_uint8 a[16], const drwav_uint8 b[16]);
 
 /* Compares a four-character-code for the purpose of checking the type of a RIFF chunk. */
-DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8 *a, const char *b);
+DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8* a, const char* b);
 
 #ifdef __cplusplus
 }
@@ -1069,15 +999,15 @@ DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8 *a, const char *b);
 
 /* CPU architecture. */
 #if defined(__x86_64__) || defined(_M_X64)
-#define DRWAV_X64
+    #define DRWAV_X64
 #elif defined(__i386) || defined(_M_IX86)
-#define DRWAV_X86
+    #define DRWAV_X86
 #elif defined(__arm__) || defined(_M_ARM)
-#define DRWAV_ARM
+    #define DRWAV_ARM
 #endif
 
 #ifdef _MSC_VER
-#define DRWAV_INLINE __forceinline
+    #define DRWAV_INLINE __forceinline
 #elif defined(__GNUC__)
     /*
     I've had a bug report where GCC is emitting warnings about functions possibly not being inlineable. This warning happens when
@@ -1086,51 +1016,51 @@ DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8 *a, const char *b);
     command line, we cannot use the "inline" keyword and instead need to use "__inline__". In an attempt to work around this issue
     I am using "__inline__" only when we're compiling in strict ANSI mode.
     */
-#if defined(__STRICT_ANSI__)
-#define DRWAV_INLINE __inline__ __attribute__((always_inline))
-#else
-#define DRWAV_INLINE inline __attribute__((always_inline))
-#endif
+    #if defined(__STRICT_ANSI__)
+        #define DRWAV_INLINE __inline__ __attribute__((always_inline))
+    #else
+        #define DRWAV_INLINE inline __attribute__((always_inline))
+    #endif
 #elif defined(__WATCOMC__)
-#define DRWAV_INLINE __inline
+    #define DRWAV_INLINE __inline
 #else
-#define DRWAV_INLINE
+    #define DRWAV_INLINE
 #endif
 
 #if defined(SIZE_MAX)
-#define DRWAV_SIZE_MAX  SIZE_MAX
+    #define DRWAV_SIZE_MAX  SIZE_MAX
 #else
-#if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
-#define DRWAV_SIZE_MAX  ((drwav_uint64)0xFFFFFFFFFFFFFFFF)
-#else
-#define DRWAV_SIZE_MAX  0xFFFFFFFF
-#endif
+    #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
+        #define DRWAV_SIZE_MAX  ((drwav_uint64)0xFFFFFFFFFFFFFFFF)
+    #else
+        #define DRWAV_SIZE_MAX  0xFFFFFFFF
+    #endif
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-#define DRWAV_HAS_BYTESWAP16_INTRINSIC
-#define DRWAV_HAS_BYTESWAP32_INTRINSIC
-#define DRWAV_HAS_BYTESWAP64_INTRINSIC
+    #define DRWAV_HAS_BYTESWAP16_INTRINSIC
+    #define DRWAV_HAS_BYTESWAP32_INTRINSIC
+    #define DRWAV_HAS_BYTESWAP64_INTRINSIC
 #elif defined(__clang__)
-#if defined(__has_builtin)
-#if __has_builtin(__builtin_bswap16)
-#define DRWAV_HAS_BYTESWAP16_INTRINSIC
-#endif
-#if __has_builtin(__builtin_bswap32)
-#define DRWAV_HAS_BYTESWAP32_INTRINSIC
-#endif
-#if __has_builtin(__builtin_bswap64)
-#define DRWAV_HAS_BYTESWAP64_INTRINSIC
-#endif
-#endif
+    #if defined(__has_builtin)
+        #if __has_builtin(__builtin_bswap16)
+            #define DRWAV_HAS_BYTESWAP16_INTRINSIC
+        #endif
+        #if __has_builtin(__builtin_bswap32)
+            #define DRWAV_HAS_BYTESWAP32_INTRINSIC
+        #endif
+        #if __has_builtin(__builtin_bswap64)
+            #define DRWAV_HAS_BYTESWAP64_INTRINSIC
+        #endif
+    #endif
 #elif defined(__GNUC__)
-#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
-#define DRWAV_HAS_BYTESWAP32_INTRINSIC
-#define DRWAV_HAS_BYTESWAP64_INTRINSIC
-#endif
-#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))
-#define DRWAV_HAS_BYTESWAP16_INTRINSIC
-#endif
+    #if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
+        #define DRWAV_HAS_BYTESWAP32_INTRINSIC
+        #define DRWAV_HAS_BYTESWAP64_INTRINSIC
+    #endif
+    #if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))
+        #define DRWAV_HAS_BYTESWAP16_INTRINSIC
+    #endif
 #endif
 
 DRWAV_API void drwav_version(drwav_uint32* pMajor, drwav_uint32* pMinor, drwav_uint32* pRevision)
@@ -1254,13 +1184,13 @@ static DRWAV_INLINE void drwav__bytes_to_guid(const drwav_uint8* data, drwav_uin
 static DRWAV_INLINE drwav_uint16 drwav__bswap16(drwav_uint16 n)
 {
 #ifdef DRWAV_HAS_BYTESWAP16_INTRINSIC
-#if defined(_MSC_VER)
+    #if defined(_MSC_VER)
         return _byteswap_ushort(n);
-#elif defined(__GNUC__) || defined(__clang__)
+    #elif defined(__GNUC__) || defined(__clang__)
         return __builtin_bswap16(n);
-#else
-#error "This compiler does not support the byte swap intrinsic."
-#endif
+    #else
+        #error "This compiler does not support the byte swap intrinsic."
+    #endif
 #else
     return ((n & 0xFF00) >> 8) |
            ((n & 0x00FF) << 8);
@@ -1270,26 +1200,26 @@ static DRWAV_INLINE drwav_uint16 drwav__bswap16(drwav_uint16 n)
 static DRWAV_INLINE drwav_uint32 drwav__bswap32(drwav_uint32 n)
 {
 #ifdef DRWAV_HAS_BYTESWAP32_INTRINSIC
-#if defined(_MSC_VER)
+    #if defined(_MSC_VER)
         return _byteswap_ulong(n);
-#elif defined(__GNUC__) || defined(__clang__)
-#if defined(DRWAV_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 6) && !defined(DRWAV_64BIT)   /* <-- 64-bit inline assembly has not been tested, so disabling for now. */
+    #elif defined(__GNUC__) || defined(__clang__)
+        #if defined(DRWAV_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 6) && !defined(DRWAV_64BIT)   /* <-- 64-bit inline assembly has not been tested, so disabling for now. */
             /* Inline assembly optimized implementation for ARM. In my testing, GCC does not generate optimized code with __builtin_bswap32(). */
             drwav_uint32 r;
             __asm__ __volatile__ (
-#if defined(DRWAV_64BIT)
+            #if defined(DRWAV_64BIT)
                 "rev %w[out], %w[in]" : [out]"=r"(r) : [in]"r"(n)   /* <-- This is untested. If someone in the community could test this, that would be appreciated! */
-#else
+            #else
                 "rev %[out], %[in]" : [out]"=r"(r) : [in]"r"(n)
-#endif
+            #endif
             );
             return r;
-#else
+        #else
             return __builtin_bswap32(n);
-#endif
-#else
-#error "This compiler does not support the byte swap intrinsic."
-#endif
+        #endif
+    #else
+        #error "This compiler does not support the byte swap intrinsic."
+    #endif
 #else
     return ((n & 0xFF000000) >> 24) |
            ((n & 0x00FF0000) >>  8) |
@@ -1301,13 +1231,13 @@ static DRWAV_INLINE drwav_uint32 drwav__bswap32(drwav_uint32 n)
 static DRWAV_INLINE drwav_uint64 drwav__bswap64(drwav_uint64 n)
 {
 #ifdef DRWAV_HAS_BYTESWAP64_INTRINSIC
-#if defined(_MSC_VER)
+    #if defined(_MSC_VER)
         return _byteswap_uint64(n);
-#elif defined(__GNUC__) || defined(__clang__)
+    #elif defined(__GNUC__) || defined(__clang__)
         return __builtin_bswap64(n);
-#else
-#error "This compiler does not support the byte swap intrinsic."
-#endif
+    #else
+        #error "This compiler does not support the byte swap intrinsic."
+    #endif
 #else
     /* Weird "<< 32" bitshift is required for C89 because it doesn't support 64-bit constants. Should be optimized out by a good compiler. */
     return ((n & ((drwav_uint64)0xFF000000 << 32)) >> 56) |
@@ -1439,12 +1369,12 @@ static DRWAV_INLINE void drwav__bswap_samples_ieee(void* pSamples, drwav_uint64 
 {
     switch (bytesPerSample)
     {
-#if 0   /* Contributions welcome for f16 support. */
+    #if 0   /* Contributions welcome for f16 support. */
         case 2: /* f16 */
         {
             drwav__bswap_samples_f16((drwav_float16*)pSamples, sampleCount);
         } break;
-#endif
+    #endif
         case 4: /* f32 */
         {
             drwav__bswap_samples_f32((float*)pSamples, sampleCount);
@@ -2055,7 +1985,7 @@ static drwav_bool32 drwav_init__internal(drwav* pWav, drwav_chunk_proc onChunk, 
     We need to enumerate over each chunk for two reasons:
       1) The "data" chunk may not be the next one
       2) We may want to report each chunk back to the client
-
+    
     In order to correctly report each chunk back to the client we will need to keep looping until the end of the file.
     */
     foundDataChunk = DRWAV_FALSE;
@@ -2087,7 +2017,7 @@ static drwav_bool32 drwav_init__internal(drwav* pWav, drwav_chunk_proc onChunk, 
                 }
             }
         }
-
+        
 
         if (!foundDataChunk) {
             pWav->dataChunkDataPos = cursor;
@@ -2229,7 +2159,7 @@ static drwav_bool32 drwav_init__internal(drwav* pWav, drwav_chunk_proc onChunk, 
         }
         cursor = pWav->dataChunkDataPos;
     }
-
+    
 
     /* At this point we should be sitting on the first byte of the raw audio data. */
 
@@ -2501,7 +2431,7 @@ static drwav_bool32 drwav_init_write__internal(drwav* pWav, const drwav_data_for
         runningPos += drwav__write(pWav, "WAVE", 4);
     }
 
-
+    
     /* "ds64" chunk (RF64 only). */
     if (pFormat->container == drwav_container_rf64) {
         drwav_uint32 initialds64ChunkSize = 28;                                 /* 28 = [Size of RIFF (8 bytes)] + [Size of DATA (8 bytes)] + [Sample Count (8 bytes)] + [Table Length (4 bytes)]. Table length always set to 0. */
@@ -2626,399 +2556,399 @@ static drwav_result drwav_result_from_errno(int e)
     switch (e)
     {
         case 0: return DRWAV_SUCCESS;
-#ifdef EPERM
+    #ifdef EPERM
         case EPERM: return DRWAV_INVALID_OPERATION;
-#endif
-#ifdef ENOENT
+    #endif
+    #ifdef ENOENT
         case ENOENT: return DRWAV_DOES_NOT_EXIST;
-#endif
-#ifdef ESRCH
+    #endif
+    #ifdef ESRCH
         case ESRCH: return DRWAV_DOES_NOT_EXIST;
-#endif
-#ifdef EINTR
+    #endif
+    #ifdef EINTR
         case EINTR: return DRWAV_INTERRUPT;
-#endif
-#ifdef EIO
+    #endif
+    #ifdef EIO
         case EIO: return DRWAV_IO_ERROR;
-#endif
-#ifdef ENXIO
+    #endif
+    #ifdef ENXIO
         case ENXIO: return DRWAV_DOES_NOT_EXIST;
-#endif
-#ifdef E2BIG
+    #endif
+    #ifdef E2BIG
         case E2BIG: return DRWAV_INVALID_ARGS;
-#endif
-#ifdef ENOEXEC
+    #endif
+    #ifdef ENOEXEC
         case ENOEXEC: return DRWAV_INVALID_FILE;
-#endif
-#ifdef EBADF
+    #endif
+    #ifdef EBADF
         case EBADF: return DRWAV_INVALID_FILE;
-#endif
-#ifdef ECHILD
+    #endif
+    #ifdef ECHILD
         case ECHILD: return DRWAV_ERROR;
-#endif
-#ifdef EAGAIN
+    #endif
+    #ifdef EAGAIN
         case EAGAIN: return DRWAV_UNAVAILABLE;
-#endif
-#ifdef ENOMEM
+    #endif
+    #ifdef ENOMEM
         case ENOMEM: return DRWAV_OUT_OF_MEMORY;
-#endif
-#ifdef EACCES
+    #endif
+    #ifdef EACCES
         case EACCES: return DRWAV_ACCESS_DENIED;
-#endif
-#ifdef EFAULT
+    #endif
+    #ifdef EFAULT
         case EFAULT: return DRWAV_BAD_ADDRESS;
-#endif
-#ifdef ENOTBLK
+    #endif
+    #ifdef ENOTBLK
         case ENOTBLK: return DRWAV_ERROR;
-#endif
-#ifdef EBUSY
+    #endif
+    #ifdef EBUSY
         case EBUSY: return DRWAV_BUSY;
-#endif
-#ifdef EEXIST
+    #endif
+    #ifdef EEXIST
         case EEXIST: return DRWAV_ALREADY_EXISTS;
-#endif
-#ifdef EXDEV
+    #endif
+    #ifdef EXDEV
         case EXDEV: return DRWAV_ERROR;
-#endif
-#ifdef ENODEV
+    #endif
+    #ifdef ENODEV
         case ENODEV: return DRWAV_DOES_NOT_EXIST;
-#endif
-#ifdef ENOTDIR
+    #endif
+    #ifdef ENOTDIR
         case ENOTDIR: return DRWAV_NOT_DIRECTORY;
-#endif
-#ifdef EISDIR
+    #endif
+    #ifdef EISDIR
         case EISDIR: return DRWAV_IS_DIRECTORY;
-#endif
-#ifdef EINVAL
+    #endif
+    #ifdef EINVAL
         case EINVAL: return DRWAV_INVALID_ARGS;
-#endif
-#ifdef ENFILE
+    #endif
+    #ifdef ENFILE
         case ENFILE: return DRWAV_TOO_MANY_OPEN_FILES;
-#endif
-#ifdef EMFILE
+    #endif
+    #ifdef EMFILE
         case EMFILE: return DRWAV_TOO_MANY_OPEN_FILES;
-#endif
-#ifdef ENOTTY
+    #endif
+    #ifdef ENOTTY
         case ENOTTY: return DRWAV_INVALID_OPERATION;
-#endif
-#ifdef ETXTBSY
+    #endif
+    #ifdef ETXTBSY
         case ETXTBSY: return DRWAV_BUSY;
-#endif
-#ifdef EFBIG
+    #endif
+    #ifdef EFBIG
         case EFBIG: return DRWAV_TOO_BIG;
-#endif
-#ifdef ENOSPC
+    #endif
+    #ifdef ENOSPC
         case ENOSPC: return DRWAV_NO_SPACE;
-#endif
-#ifdef ESPIPE
+    #endif
+    #ifdef ESPIPE
         case ESPIPE: return DRWAV_BAD_SEEK;
-#endif
-#ifdef EROFS
+    #endif
+    #ifdef EROFS
         case EROFS: return DRWAV_ACCESS_DENIED;
-#endif
-#ifdef EMLINK
+    #endif
+    #ifdef EMLINK
         case EMLINK: return DRWAV_TOO_MANY_LINKS;
-#endif
-#ifdef EPIPE
+    #endif
+    #ifdef EPIPE
         case EPIPE: return DRWAV_BAD_PIPE;
-#endif
-#ifdef EDOM
+    #endif
+    #ifdef EDOM
         case EDOM: return DRWAV_OUT_OF_RANGE;
-#endif
-#ifdef ERANGE
+    #endif
+    #ifdef ERANGE
         case ERANGE: return DRWAV_OUT_OF_RANGE;
-#endif
-#ifdef EDEADLK
+    #endif
+    #ifdef EDEADLK
         case EDEADLK: return DRWAV_DEADLOCK;
-#endif
-#ifdef ENAMETOOLONG
+    #endif
+    #ifdef ENAMETOOLONG
         case ENAMETOOLONG: return DRWAV_PATH_TOO_LONG;
-#endif
-#ifdef ENOLCK
+    #endif
+    #ifdef ENOLCK
         case ENOLCK: return DRWAV_ERROR;
-#endif
-#ifdef ENOSYS
+    #endif
+    #ifdef ENOSYS
         case ENOSYS: return DRWAV_NOT_IMPLEMENTED;
-#endif
-#ifdef ENOTEMPTY
+    #endif
+    #ifdef ENOTEMPTY
         case ENOTEMPTY: return DRWAV_DIRECTORY_NOT_EMPTY;
-#endif
-#ifdef ELOOP
+    #endif
+    #ifdef ELOOP
         case ELOOP: return DRWAV_TOO_MANY_LINKS;
-#endif
-#ifdef ENOMSG
+    #endif
+    #ifdef ENOMSG
         case ENOMSG: return DRWAV_NO_MESSAGE;
-#endif
-#ifdef EIDRM
+    #endif
+    #ifdef EIDRM
         case EIDRM: return DRWAV_ERROR;
-#endif
-#ifdef ECHRNG
+    #endif
+    #ifdef ECHRNG
         case ECHRNG: return DRWAV_ERROR;
-#endif
-#ifdef EL2NSYNC
+    #endif
+    #ifdef EL2NSYNC
         case EL2NSYNC: return DRWAV_ERROR;
-#endif
-#ifdef EL3HLT
+    #endif
+    #ifdef EL3HLT
         case EL3HLT: return DRWAV_ERROR;
-#endif
-#ifdef EL3RST
+    #endif
+    #ifdef EL3RST
         case EL3RST: return DRWAV_ERROR;
-#endif
-#ifdef ELNRNG
+    #endif
+    #ifdef ELNRNG
         case ELNRNG: return DRWAV_OUT_OF_RANGE;
-#endif
-#ifdef EUNATCH
+    #endif
+    #ifdef EUNATCH
         case EUNATCH: return DRWAV_ERROR;
-#endif
-#ifdef ENOCSI
+    #endif
+    #ifdef ENOCSI
         case ENOCSI: return DRWAV_ERROR;
-#endif
-#ifdef EL2HLT
+    #endif
+    #ifdef EL2HLT
         case EL2HLT: return DRWAV_ERROR;
-#endif
-#ifdef EBADE
+    #endif
+    #ifdef EBADE
         case EBADE: return DRWAV_ERROR;
-#endif
-#ifdef EBADR
+    #endif
+    #ifdef EBADR
         case EBADR: return DRWAV_ERROR;
-#endif
-#ifdef EXFULL
+    #endif
+    #ifdef EXFULL
         case EXFULL: return DRWAV_ERROR;
-#endif
-#ifdef ENOANO
+    #endif
+    #ifdef ENOANO
         case ENOANO: return DRWAV_ERROR;
-#endif
-#ifdef EBADRQC
+    #endif
+    #ifdef EBADRQC
         case EBADRQC: return DRWAV_ERROR;
-#endif
-#ifdef EBADSLT
+    #endif
+    #ifdef EBADSLT
         case EBADSLT: return DRWAV_ERROR;
-#endif
-#ifdef EBFONT
+    #endif
+    #ifdef EBFONT
         case EBFONT: return DRWAV_INVALID_FILE;
-#endif
-#ifdef ENOSTR
+    #endif
+    #ifdef ENOSTR
         case ENOSTR: return DRWAV_ERROR;
-#endif
-#ifdef ENODATA
+    #endif
+    #ifdef ENODATA
         case ENODATA: return DRWAV_NO_DATA_AVAILABLE;
-#endif
-#ifdef ETIME
+    #endif
+    #ifdef ETIME
         case ETIME: return DRWAV_TIMEOUT;
-#endif
-#ifdef ENOSR
+    #endif
+    #ifdef ENOSR
         case ENOSR: return DRWAV_NO_DATA_AVAILABLE;
-#endif
-#ifdef ENONET
+    #endif
+    #ifdef ENONET
         case ENONET: return DRWAV_NO_NETWORK;
-#endif
-#ifdef ENOPKG
+    #endif
+    #ifdef ENOPKG
         case ENOPKG: return DRWAV_ERROR;
-#endif
-#ifdef EREMOTE
+    #endif
+    #ifdef EREMOTE
         case EREMOTE: return DRWAV_ERROR;
-#endif
-#ifdef ENOLINK
+    #endif
+    #ifdef ENOLINK
         case ENOLINK: return DRWAV_ERROR;
-#endif
-#ifdef EADV
+    #endif
+    #ifdef EADV
         case EADV: return DRWAV_ERROR;
-#endif
-#ifdef ESRMNT
+    #endif
+    #ifdef ESRMNT
         case ESRMNT: return DRWAV_ERROR;
-#endif
-#ifdef ECOMM
+    #endif
+    #ifdef ECOMM
         case ECOMM: return DRWAV_ERROR;
-#endif
-#ifdef EPROTO
+    #endif
+    #ifdef EPROTO
         case EPROTO: return DRWAV_ERROR;
-#endif
-#ifdef EMULTIHOP
+    #endif
+    #ifdef EMULTIHOP
         case EMULTIHOP: return DRWAV_ERROR;
-#endif
-#ifdef EDOTDOT
+    #endif
+    #ifdef EDOTDOT
         case EDOTDOT: return DRWAV_ERROR;
-#endif
-#ifdef EBADMSG
+    #endif
+    #ifdef EBADMSG
         case EBADMSG: return DRWAV_BAD_MESSAGE;
-#endif
-#ifdef EOVERFLOW
+    #endif
+    #ifdef EOVERFLOW
         case EOVERFLOW: return DRWAV_TOO_BIG;
-#endif
-#ifdef ENOTUNIQ
+    #endif
+    #ifdef ENOTUNIQ
         case ENOTUNIQ: return DRWAV_NOT_UNIQUE;
-#endif
-#ifdef EBADFD
+    #endif
+    #ifdef EBADFD
         case EBADFD: return DRWAV_ERROR;
-#endif
-#ifdef EREMCHG
+    #endif
+    #ifdef EREMCHG
         case EREMCHG: return DRWAV_ERROR;
-#endif
-#ifdef ELIBACC
+    #endif
+    #ifdef ELIBACC
         case ELIBACC: return DRWAV_ACCESS_DENIED;
-#endif
-#ifdef ELIBBAD
+    #endif
+    #ifdef ELIBBAD
         case ELIBBAD: return DRWAV_INVALID_FILE;
-#endif
-#ifdef ELIBSCN
+    #endif
+    #ifdef ELIBSCN
         case ELIBSCN: return DRWAV_INVALID_FILE;
-#endif
-#ifdef ELIBMAX
+    #endif
+    #ifdef ELIBMAX
         case ELIBMAX: return DRWAV_ERROR;
-#endif
-#ifdef ELIBEXEC
+    #endif
+    #ifdef ELIBEXEC
         case ELIBEXEC: return DRWAV_ERROR;
-#endif
-#ifdef EILSEQ
+    #endif
+    #ifdef EILSEQ
         case EILSEQ: return DRWAV_INVALID_DATA;
-#endif
-#ifdef ERESTART
+    #endif
+    #ifdef ERESTART
         case ERESTART: return DRWAV_ERROR;
-#endif
-#ifdef ESTRPIPE
+    #endif
+    #ifdef ESTRPIPE
         case ESTRPIPE: return DRWAV_ERROR;
-#endif
-#ifdef EUSERS
+    #endif
+    #ifdef EUSERS
         case EUSERS: return DRWAV_ERROR;
-#endif
-#ifdef ENOTSOCK
+    #endif
+    #ifdef ENOTSOCK
         case ENOTSOCK: return DRWAV_NOT_SOCKET;
-#endif
-#ifdef EDESTADDRREQ
+    #endif
+    #ifdef EDESTADDRREQ
         case EDESTADDRREQ: return DRWAV_NO_ADDRESS;
-#endif
-#ifdef EMSGSIZE
+    #endif
+    #ifdef EMSGSIZE
         case EMSGSIZE: return DRWAV_TOO_BIG;
-#endif
-#ifdef EPROTOTYPE
+    #endif
+    #ifdef EPROTOTYPE
         case EPROTOTYPE: return DRWAV_BAD_PROTOCOL;
-#endif
-#ifdef ENOPROTOOPT
+    #endif
+    #ifdef ENOPROTOOPT
         case ENOPROTOOPT: return DRWAV_PROTOCOL_UNAVAILABLE;
-#endif
-#ifdef EPROTONOSUPPORT
+    #endif
+    #ifdef EPROTONOSUPPORT
         case EPROTONOSUPPORT: return DRWAV_PROTOCOL_NOT_SUPPORTED;
-#endif
-#ifdef ESOCKTNOSUPPORT
+    #endif
+    #ifdef ESOCKTNOSUPPORT
         case ESOCKTNOSUPPORT: return DRWAV_SOCKET_NOT_SUPPORTED;
-#endif
-#ifdef EOPNOTSUPP
+    #endif
+    #ifdef EOPNOTSUPP
         case EOPNOTSUPP: return DRWAV_INVALID_OPERATION;
-#endif
-#ifdef EPFNOSUPPORT
+    #endif
+    #ifdef EPFNOSUPPORT
         case EPFNOSUPPORT: return DRWAV_PROTOCOL_FAMILY_NOT_SUPPORTED;
-#endif
-#ifdef EAFNOSUPPORT
+    #endif
+    #ifdef EAFNOSUPPORT
         case EAFNOSUPPORT: return DRWAV_ADDRESS_FAMILY_NOT_SUPPORTED;
-#endif
-#ifdef EADDRINUSE
+    #endif
+    #ifdef EADDRINUSE
         case EADDRINUSE: return DRWAV_ALREADY_IN_USE;
-#endif
-#ifdef EADDRNOTAVAIL
+    #endif
+    #ifdef EADDRNOTAVAIL
         case EADDRNOTAVAIL: return DRWAV_ERROR;
-#endif
-#ifdef ENETDOWN
+    #endif
+    #ifdef ENETDOWN
         case ENETDOWN: return DRWAV_NO_NETWORK;
-#endif
-#ifdef ENETUNREACH
+    #endif
+    #ifdef ENETUNREACH
         case ENETUNREACH: return DRWAV_NO_NETWORK;
-#endif
-#ifdef ENETRESET
+    #endif
+    #ifdef ENETRESET
         case ENETRESET: return DRWAV_NO_NETWORK;
-#endif
-#ifdef ECONNABORTED
+    #endif
+    #ifdef ECONNABORTED
         case ECONNABORTED: return DRWAV_NO_NETWORK;
-#endif
-#ifdef ECONNRESET
+    #endif
+    #ifdef ECONNRESET
         case ECONNRESET: return DRWAV_CONNECTION_RESET;
-#endif
-#ifdef ENOBUFS
+    #endif
+    #ifdef ENOBUFS
         case ENOBUFS: return DRWAV_NO_SPACE;
-#endif
-#ifdef EISCONN
+    #endif
+    #ifdef EISCONN
         case EISCONN: return DRWAV_ALREADY_CONNECTED;
-#endif
-#ifdef ENOTCONN
+    #endif
+    #ifdef ENOTCONN
         case ENOTCONN: return DRWAV_NOT_CONNECTED;
-#endif
-#ifdef ESHUTDOWN
+    #endif
+    #ifdef ESHUTDOWN
         case ESHUTDOWN: return DRWAV_ERROR;
-#endif
-#ifdef ETOOMANYREFS
+    #endif
+    #ifdef ETOOMANYREFS
         case ETOOMANYREFS: return DRWAV_ERROR;
-#endif
-#ifdef ETIMEDOUT
+    #endif
+    #ifdef ETIMEDOUT
         case ETIMEDOUT: return DRWAV_TIMEOUT;
-#endif
-#ifdef ECONNREFUSED
+    #endif
+    #ifdef ECONNREFUSED
         case ECONNREFUSED: return DRWAV_CONNECTION_REFUSED;
-#endif
-#ifdef EHOSTDOWN
+    #endif
+    #ifdef EHOSTDOWN
         case EHOSTDOWN: return DRWAV_NO_HOST;
-#endif
-#ifdef EHOSTUNREACH
+    #endif
+    #ifdef EHOSTUNREACH
         case EHOSTUNREACH: return DRWAV_NO_HOST;
-#endif
-#ifdef EALREADY
+    #endif
+    #ifdef EALREADY
         case EALREADY: return DRWAV_IN_PROGRESS;
-#endif
-#ifdef EINPROGRESS
+    #endif
+    #ifdef EINPROGRESS
         case EINPROGRESS: return DRWAV_IN_PROGRESS;
-#endif
-#ifdef ESTALE
+    #endif
+    #ifdef ESTALE
         case ESTALE: return DRWAV_INVALID_FILE;
-#endif
-#ifdef EUCLEAN
+    #endif
+    #ifdef EUCLEAN
         case EUCLEAN: return DRWAV_ERROR;
-#endif
-#ifdef ENOTNAM
+    #endif
+    #ifdef ENOTNAM
         case ENOTNAM: return DRWAV_ERROR;
-#endif
-#ifdef ENAVAIL
+    #endif
+    #ifdef ENAVAIL
         case ENAVAIL: return DRWAV_ERROR;
-#endif
-#ifdef EISNAM
+    #endif
+    #ifdef EISNAM
         case EISNAM: return DRWAV_ERROR;
-#endif
-#ifdef EREMOTEIO
+    #endif
+    #ifdef EREMOTEIO
         case EREMOTEIO: return DRWAV_IO_ERROR;
-#endif
-#ifdef EDQUOT
+    #endif
+    #ifdef EDQUOT
         case EDQUOT: return DRWAV_NO_SPACE;
-#endif
-#ifdef ENOMEDIUM
+    #endif
+    #ifdef ENOMEDIUM
         case ENOMEDIUM: return DRWAV_DOES_NOT_EXIST;
-#endif
-#ifdef EMEDIUMTYPE
+    #endif
+    #ifdef EMEDIUMTYPE
         case EMEDIUMTYPE: return DRWAV_ERROR;
-#endif
-#ifdef ECANCELED
+    #endif
+    #ifdef ECANCELED
         case ECANCELED: return DRWAV_CANCELLED;
-#endif
-#ifdef ENOKEY
+    #endif
+    #ifdef ENOKEY
         case ENOKEY: return DRWAV_ERROR;
-#endif
-#ifdef EKEYEXPIRED
+    #endif
+    #ifdef EKEYEXPIRED
         case EKEYEXPIRED: return DRWAV_ERROR;
-#endif
-#ifdef EKEYREVOKED
+    #endif
+    #ifdef EKEYREVOKED
         case EKEYREVOKED: return DRWAV_ERROR;
-#endif
-#ifdef EKEYREJECTED
+    #endif
+    #ifdef EKEYREJECTED
         case EKEYREJECTED: return DRWAV_ERROR;
-#endif
-#ifdef EOWNERDEAD
+    #endif
+    #ifdef EOWNERDEAD
         case EOWNERDEAD: return DRWAV_ERROR;
-#endif
-#ifdef ENOTRECOVERABLE
+    #endif
+    #ifdef ENOTRECOVERABLE
         case ENOTRECOVERABLE: return DRWAV_ERROR;
-#endif
-#ifdef ERFKILL
+    #endif
+    #ifdef ERFKILL
         case ERFKILL: return DRWAV_ERROR;
-#endif
-#ifdef EHWPOISON
+    #endif
+    #ifdef EHWPOISON
         case EHWPOISON: return DRWAV_ERROR;
-#endif
+    #endif
         default: return DRWAV_ERROR;
     }
 }
@@ -3046,11 +2976,11 @@ static drwav_result drwav_fopen(FILE** ppFile, const char* pFilePath, const char
 #if defined(_WIN32) || defined(__APPLE__)
     *ppFile = fopen(pFilePath, pOpenMode);
 #else
-#if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64 && defined(_LARGEFILE64_SOURCE)
+    #if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64 && defined(_LARGEFILE64_SOURCE)
         *ppFile = fopen64(pFilePath, pOpenMode);
-#else
+    #else
         *ppFile = fopen(pFilePath, pOpenMode);
-#endif
+    #endif
 #endif
     if (*ppFile == NULL) {
         drwav_result result = drwav_result_from_errno(errno);
@@ -3078,9 +3008,9 @@ This can be reviewed as compatibility issues arise. The preference is to use _wf
 fallback, so if you notice your compiler not detecting this properly I'm happy to look at adding support.
 */
 #if defined(_WIN32)
-#if defined(_MSC_VER) || defined(__MINGW64__) || (!defined(__STRICT_ANSI__) && !defined(_NO_EXT_KEYS))
-#define DRWAV_HAS_WFOPEN
-#endif
+    #if defined(_MSC_VER) || defined(__MINGW64__) || (!defined(__STRICT_ANSI__) && !defined(_NO_EXT_KEYS))
+        #define DRWAV_HAS_WFOPEN
+    #endif
 #endif
 
 static drwav_result drwav_wfopen(FILE** ppFile, const wchar_t* pFilePath, const wchar_t* pOpenMode, const drwav_allocation_callbacks* pAllocationCallbacks)
@@ -3096,17 +3026,17 @@ static drwav_result drwav_wfopen(FILE** ppFile, const wchar_t* pFilePath, const 
 #if defined(DRWAV_HAS_WFOPEN)
     {
         /* Use _wfopen() on Windows. */
-#if defined(_MSC_VER) && _MSC_VER >= 1400
+    #if defined(_MSC_VER) && _MSC_VER >= 1400
         errno_t err = _wfopen_s(ppFile, pFilePath, pOpenMode);
         if (err != 0) {
             return drwav_result_from_errno(err);
         }
-#else
+    #else
         *ppFile = _wfopen(pFilePath, pOpenMode);
         if (*ppFile == NULL) {
             return drwav_result_from_errno(errno);
         }
-#endif
+    #endif
         (void)pAllocationCallbacks;
     }
 #else
