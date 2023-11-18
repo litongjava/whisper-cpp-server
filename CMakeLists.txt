@@ -22,5 +22,8 @@ add_executable(web_socket_server main.cpp web_socket_server.cpp)
 # 链接 whisper.cpp 库
 target_link_libraries(web_socket_server whisper ${SDL2_LIBRARIES})
 
+add_executable(stream_components stream_components.cpp)
+target_link_libraries(stream_components whisper ${SDL2_LIBRARIES})
+
 
 
