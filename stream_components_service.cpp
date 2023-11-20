@@ -41,7 +41,7 @@ WhisperService::~WhisperService() {
   whisper_free(ctx);
 }
 
-WhisperOutputPtr WhisperService::process(const float *samples, int sample_count) {
+bool WhisperService::process(const float *samples, int sample_count) {
   whisper_full_params wparams = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
 
   wparams.print_progress = false;
@@ -70,7 +70,7 @@ WhisperOutputPtr WhisperService::process(const float *samples, int sample_count)
 
   // *** Run the actual inference!!! ***
   if (whisper_full(ctx, wparams, samples, sample_count) != 0) {
-    return nullptr;
+    return false;
   }
 
   // Now sure whether n_iter and n_new_line should have ever been there...
@@ -96,8 +96,5 @@ WhisperOutputPtr WhisperService::process(const float *samples, int sample_count)
       }
     }
   }
-
-  auto r = std::make_shared<WhisperStreamOutput>(ctx, server_params);
-
-  return r;
+  return true;
 }

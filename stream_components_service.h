@@ -22,9 +22,7 @@ namespace stream_components {
 
     ~WhisperService();
 
-    WhisperOutputPtr process(
-      const float *samples,
-      int size);
+    bool process(const float *samples,int size);
 
     service_params server_params;
     audio_params audio_params;

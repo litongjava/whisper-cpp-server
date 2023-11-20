@@ -18,7 +18,7 @@ namespace stream_components {
     int32_t n_samples_keep = 0;
     int32_t n_samples_len = 0;
     int32_t n_samples_30s = 0;
-    bool use_vad = false;
+    bool use_vad = true;
 
     float vad_thold = 0.6f;
     float freq_thold = 100.0f;
