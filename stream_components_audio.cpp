@@ -92,7 +92,6 @@ std::vector<float> &LocalSDLMicrophone::get_next() {
         break;
       } else {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
         continue;
       }
     }
