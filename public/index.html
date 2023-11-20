@@ -7,30 +7,39 @@
 <body>
 <button id="startRecord">开始录音</button>
 <button id="stopRecord" disabled>停止录音</button>
+<button id="sendData" disabled>发送数据</button>
+<audio id="audioPlayer" controls></audio>
+<a id="downloadLink" style="display: none;">下载录音</a>
 <pre id="response"></pre>
 
 <script>
     let mediaRecorder;
     let audioChunks = [];
+    let audioBlob;
 
-    document.getElementById("startRecord").addEventListener("click", async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
+    document.getElementById("startRecord").addEventListener("click", () => {
+        navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000 } })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
 
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
 
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
-            sendData(audioBlob);
-            audioChunks = [];
-        };
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioChunks = [];
 
-        setTimeout(() => {
-            mediaRecorder.stop();
-        }, 30000); // Stop recording after 30 seconds
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById("audioPlayer").src = audioUrl;
+                    document.getElementById("downloadLink").href = audioUrl;
+                    document.getElementById("downloadLink").download = "recording.wav";
+                    document.getElementById("downloadLink").style.display = 'block';
+
+                    document.getElementById("sendData").disabled = false;
+                };
+            });
 
         document.getElementById("startRecord").disabled = true;
         document.getElementById("stopRecord").disabled = false;
@@ -42,13 +51,13 @@
         document.getElementById("stopRecord").disabled = true;
     });
 
-    function sendData(audioBlob) {
+    document.getElementById("sendData").addEventListener("click", () => {
         const formData = new FormData();
         formData.append("file", audioBlob);
         formData.append("temperature", "0.2");
         formData.append("response-format", "json");
 
-        fetch("http://127.0.0.1:8080/inference", {
+        fetch("/inference", {
             method: "POST",
             body: formData,
         })
@@ -59,7 +68,7 @@
             .catch(error => {
                 console.error("Error:", error);
             });
-    }
+    });
 </script>
 </body>
 </html>

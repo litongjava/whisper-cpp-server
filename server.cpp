@@ -19,7 +19,7 @@ bool is_file_exist(const char *fileName) {
 }
 
 int main(int argc, char **argv) {
-  whisper_local_stream_params params;
+  whisper_params params;
   server_params sparams;
 
   std::mutex whisper_mutex;
