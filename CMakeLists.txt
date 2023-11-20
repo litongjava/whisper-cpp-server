@@ -37,6 +37,6 @@ target_link_libraries(simplest whisper)
 add_executable(stream_components stream_components.cpp stream_components_audio.cpp stream_components_output.cpp stream_components_service.cpp)
 target_link_libraries(stream_components ${SDL2_LIBRARIES})
 
-add_executable(server server.cpp whisper_params.h common.cpp httplib.h json.hpp inference_handler.cpp)
+add_executable(server server.cpp common.cpp httplib.h json.hpp inference_handler.cpp whisper_params.cpp)
 target_link_libraries(server whisper)
 
