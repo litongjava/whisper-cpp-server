@@ -113,7 +113,9 @@ int main(int argc, char **argv) {
   stream_components::LocalSDLMicrophone microphone(params.audio);
 
   // Instantiate the service
-  stream_components::WhisperService whisperService(params.service, params.audio);
+  struct whisper_context_params cparams;
+  cparams.use_gpu = params.service.use_gpu;
+  stream_components::WhisperService whisperService(params.service, params.audio,cparams);
 
   // Print the 'header'...
   WhisperStreamOutput::to_json(std::cout, params.service, whisperService.ctx);
@@ -133,13 +135,11 @@ int main(int argc, char **argv) {
 
     // get the whisper output
     const WhisperOutputPtr &outputPtr = whisperService.process(pcmf32.data(), pcmf32.size());
-
     // write the output as json to stdout (for this example)
     if (outputPtr) {
       outputPtr->transcription_to_json(std::cout);
     }
   }
-
   std::cout << "EXITED MAIN LOOP" << std::endl;
   return 0;
 }

@@ -1,5 +1,6 @@
 #ifndef WHISPER_STREAM_COMPONENTS_SERVER_H
 #define WHISPER_STREAM_COMPONENTS_SERVER_H
+
 #include <vector>
 #include <whisper.h>
 #include "stream_components_params.h"
@@ -12,11 +13,12 @@ namespace stream_components {
 /**
  * Encapsulates the Whisper service.
  */
-class WhisperService {
+  class WhisperService {
   public:
     WhisperService(
       const struct service_params &server_params,
-      const struct audio_params &audio_params);
+      const struct audio_params &audio_params,
+      const struct whisper_context_params &cparams);
 
     ~WhisperService();
 

@@ -1,0 +1,57 @@
+{
+  "transcription": [
+    {
+      "timestamps": {
+        "from": "00:00:00,000",
+        "to": "00:00:30,000"
+      },
+      "offsets": {
+        "from": 0,
+        "to": 30000
+      },
+      "token": {
+        "text": "[_BEG_]",
+        "id": 50363,
+        "confidence": 0.655302,
+        "t0": 0,
+        "t1": 0
+      },
+      "token": {
+        "text": " Thank",
+        "id": 6952,
+        "confidence": 0.673538,
+        "t0": 0,
+        "t1": 124
+      },
+      "token": {
+        "text": " you",
+        "id": 345,
+        "confidence": 0.931985,
+        "t0": 124,
+        "t1": 200
+      },
+      "token": {
+        "text": ".",
+        "id": 13,
+        "confidence": 0.826669,
+        "t0": 200,
+        "t1": 260
+      },
+      "token": {
+        "text": "[_TT_130]",
+        "id": 50493,
+        "confidence": 0.0699378,
+        "t0": 260,
+        "t1": 3000
+      },
+      "token": {
+        "text": "<|endoftext|>",
+        "id": 50256,
+        "confidence": 0.993674,
+        "t0": 3000,
+        "t1": 3000
+      },
+      "text": "[_BEG_] Thank you.[_TT_130]<|endoftext|>"
+    }
+  ]
+}

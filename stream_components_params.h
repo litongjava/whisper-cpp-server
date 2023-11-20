@@ -46,6 +46,7 @@ namespace stream_components {
 
     bool tinydiarize = false;
     bool diarize = false;
+    bool use_gpu = true;
 
     std::string language = "en";
     std::string model = "models/ggml-base.en.bin";

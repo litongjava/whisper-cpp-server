@@ -5,12 +5,12 @@ using namespace stream_components;
 
 // -- WhisperService --
 
-WhisperService::WhisperService(
-  const struct service_params &server_params,
-  const struct audio_params &audio_params) :
-  server_params(server_params),
-  audio_params(audio_params),
-  ctx(whisper_init_from_file(server_params.model.c_str())) {
+WhisperService::WhisperService(const struct service_params &server_params,
+                               const struct audio_params &audio_params,
+                               const struct whisper_context_params &cparams)
+  : server_params(server_params),
+    audio_params(audio_params),
+    ctx(whisper_init_from_file_with_params(server_params.model.c_str(), cparams)) {
   {
     fprintf(stderr, "\n");
     if (!whisper_is_multilingual(ctx)) {
