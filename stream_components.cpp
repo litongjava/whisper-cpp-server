@@ -2,7 +2,7 @@
 #include "stream_components_audio.h"
 #include "stream_components_params.h"
 #include "stream_components_output.h"
-#include "stream_components_server.h"
+#include "stream_components_service.h"
 
 using namespace stream_components;
 

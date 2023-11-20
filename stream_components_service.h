@@ -1,6 +1,6 @@
 #ifndef WHISPER_STREAM_COMPONENTS_SERVER_H
 #define WHISPER_STREAM_COMPONENTS_SERVER_H
-
+#include <vector>
 #include <whisper.h>
 #include "stream_components_params.h"
 #include "stream_components_output.h"
