@@ -37,8 +37,8 @@ namespace {
 
   struct server_params
   {
-    std::string hostname = "127.0.0.1";
-    std::string public_path = "examples/server/public";
+    std::string hostname = "0.0.0.0";
+    std::string public_path = "public";
     int32_t port = 8080;
     int32_t read_timeout = 600;
     int32_t write_timeout = 600;
@@ -74,6 +74,7 @@ namespace {
     bool print_progress  = false;
     bool no_timestamps   = false;
     bool log_score       = false;
+    bool use_gpu = true;
 
     std::string language        = "en";
     std::string prompt          = "";
@@ -153,6 +154,7 @@ namespace {
     // server params
     fprintf(stderr, "  --host HOST,                   [%-7s] Hostname/ip-adress for the server\n", sparams.hostname.c_str());
     fprintf(stderr, "  --port PORT,                   [%-7d] Port number for the server\n", sparams.port);
+    fprintf(stderr, "  -ng,       --no-gpu            [%-7s] disable GPU\n",                                    params.use_gpu ? "false" : "true");
     fprintf(stderr, "\n");
   }
 
@@ -197,6 +199,7 @@ namespace {
       else if (                  arg == "--port")            { sparams.port = std::stoi(argv[++i]); }
       else if (                  arg == "--host")            { sparams.hostname = argv[++i]; }
       else if (arg == "-ad" || arg == "--port")     { params.openvino_encode_device = argv[++i]; }
+      else if (arg == "-ng"   || arg == "--no-gpu")          { params.use_gpu = false; }
       else {
         fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
         whisper_print_usage(argc, argv, params, sparams);
@@ -402,7 +405,9 @@ int main(int argc, char ** argv) {
   }
 
   // whisper init
-  struct whisper_context * ctx = whisper_init_from_file(params.model.c_str());
+  struct whisper_context_params cparams;
+  cparams.use_gpu = params.use_gpu;
+  struct whisper_context * ctx = whisper_init_from_file_with_params(params.model.c_str(),cparams);
 
   if (ctx == nullptr) {
     fprintf(stderr, "error: failed to initialize whisper context\n");
@@ -623,7 +628,10 @@ int main(int argc, char ** argv) {
     whisper_free(ctx);
 
     // whisper init
-    ctx = whisper_init_from_file(model.c_str());
+//    ctx = whisper_init_from_file(model.c_str());
+    struct whisper_context_params cparams;
+
+    ctx = whisper_init_from_file_with_params(params.model.c_str(),cparams);
 
     // TODO perhaps load prior model here instead of exit
     if (ctx == nullptr) {

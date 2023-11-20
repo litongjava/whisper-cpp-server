@@ -57,11 +57,10 @@ options:
 
 **/inference**
 ```
-curl 127.0.0.1:8080/inference \
--H "Content-Type: multipart/form-data" \
--F file="<file-path>" \
--F temperature="0.2" \
--F response-format="json"
+curl --location --request POST http://127.0.0.1:8080/inference \
+--form file=@"./samples/jfk.wav" \
+--form temperature="0.2" \
+--form response-format="json"
 ```
 
 **/load**
