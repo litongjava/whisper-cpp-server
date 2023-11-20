@@ -1,4 +1,17 @@
 # whisper-cpp server
+## simplest
+```shell
+cmake-build-debug/simplest -m models/ggml-base.en.bin samples/jfk.wav
+```
+```
+simplest [options] file0.wav file1.wav ...
+
+options:                                                                                                                                                                                                
+-h,        --help              [default] show this help message and exit                                                                                                                              
+-m FNAME,  --model FNAME       [models/ggml-base.en.bin] model path                                                                                                                                   
+-di,       --diarize           [false  ] stereo audio diarization
+```
+## server
 
 Simple http server. WAV Files are passed to the inference model via http requests.
 

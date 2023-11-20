@@ -1,0 +1,6 @@
+*.bin
+coreml-encoder-base.en.mlpackage/
+coreml-encoder-large.mlpackage/
+ggml-large-encoder.mlmodelc/
+ggml-base.en-encoder.mlmodelc/
+
