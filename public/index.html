@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>语音识别</title>
+</head>
+<body>
+<button id="startRecord">开始录音</button>
+<button id="stopRecord" disabled>停止录音</button>
+<pre id="response"></pre>
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    document.getElementById("startRecord").addEventListener("click", async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+            sendData(audioBlob);
+            audioChunks = [];
+        };
+
+        setTimeout(() => {
+            mediaRecorder.stop();
+        }, 30000); // Stop recording after 30 seconds
+
+        document.getElementById("startRecord").disabled = true;
+        document.getElementById("stopRecord").disabled = false;
+    });
+
+    document.getElementById("stopRecord").addEventListener("click", () => {
+        mediaRecorder.stop();
+        document.getElementById("startRecord").disabled = false;
+        document.getElementById("stopRecord").disabled = true;
+    });
+
+    function sendData(audioBlob) {
+        const formData = new FormData();
+        formData.append("file", audioBlob);
+        formData.append("temperature", "0.2");
+        formData.append("response-format", "json");
+
+        fetch("http://127.0.0.1:8080/inference", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    }
+</script>
+</body>
+</html>

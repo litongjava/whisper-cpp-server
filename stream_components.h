@@ -8,7 +8,7 @@ using namespace stream_components;
 
 struct whisper_params {
   audio_params audio;
-  server_params server;
+  service_params server;
 
   void initialize() {
     audio.initialize();

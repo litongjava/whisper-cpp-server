@@ -87,7 +87,6 @@ std::vector<float> &LocalSDLMicrophone::get_next() {
       if (::vad_simple(pcmf32_new, WHISPER_SAMPLE_RATE, 1000, params.vad_thold, params.freq_thold, false)) {
         audio.get(params.length_ms, pcmf32);
         t_last = t_now;
-
         // done!
         break;
       } else {
