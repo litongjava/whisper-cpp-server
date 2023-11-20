@@ -1,0 +1,10 @@
+{
+  "name" : "whisper-cpp-server",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "0c20b2a97c390e106150837042d921b0939e7ecb",
+  "dependencies" : [ {
+    "name" : "sdl2",
+    "version>=" : "2.28.4#1",
+    "$comment" : "    find_package(SDL2 CONFIG REQUIRED)\n\n    target_link_libraries(main\n\n        PRIVATE\n\n        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>\n\n        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>\n\n    )\n"
+  } ]
+}
