@@ -1,4 +1,4 @@
-# whisper-cpp server
+# whisper-cpp service
 ## simplest
 ```shell
 cmake-build-debug/simplest -m models/ggml-base.en.bin samples/jfk.wav
@@ -11,12 +11,12 @@ options:
 -m FNAME,  --model FNAME       [models/ggml-base.en.bin] model path                                                                                                                                   
 -di,       --diarize           [false  ] stereo audio diarization
 ```
-## server
+## service
 
-Simple http server. WAV Files are passed to the inference model via http requests.
+Simple http service. WAV Files are passed to the inference model via http requests.
 
 ```
-./cmake-build-debug/server -m models/ggml-base.en.bin
+./cmake-build-debug/service -m models/ggml-base.en.bin
 ```
 
 ```shell
@@ -81,7 +81,7 @@ ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     4.05 MB, 
 ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     3.08 MB, (  203.67 / 11453.25)
 ggml_metal_add_buffer: allocated 'backend         ' buffer, size =    94.78 MB, (  298.45 / 11453.25)
 
-whisper server listening at http://0.0.0.0:8080
+whisper service listening at http://0.0.0.0:8080
 
 Received request: jfk.wav
 Successfully loaded jfk.wav
@@ -95,9 +95,9 @@ Running whisper.cpp inference on jfk.wav
 [00:00:00.000 --> 00:00:11.000]   And so my fellow Americans, ask not what your country can do for you, ask what you can do for your country.
 ```
 ```
-./server -h
+./service -h
 
-usage: ./bin/server [options]
+usage: ./bin/service [options]
 
 options:
   -h,        --help              [default] show this help message and exit
@@ -128,8 +128,8 @@ options:
              --prompt PROMPT     [       ] initial prompt
   -m FNAME,  --model FNAME       [models/ggml-base.en.bin] model path
   -oved D,   --ov-e-device DNAME [CPU    ] the OpenVINO device used for encode inference
-  --host HOST,                   [127.0.0.1] Hostname/ip-adress for the server
-  --port PORT,                   [8080   ] Port number for the server
+  --host HOST,                   [127.0.0.1] Hostname/ip-adress for the service
+  --port PORT,                   [8080   ] Port number for the service
 ```
 
 ## request examples

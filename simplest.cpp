@@ -52,7 +52,7 @@ void replace_all(std::string &s, const std::string &search, const std::string &r
 }
 
 // command-line parameters
-struct whisper_params {
+struct whisper_local_stream_params {
   int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
   int32_t n_processors = 1;
   int32_t offset_t_ms = 0;
@@ -97,9 +97,9 @@ struct whisper_params {
   std::vector<std::string> fname_out = {};
 };
 
-void whisper_print_usage(int argc, char **argv, const whisper_params &params);
+void whisper_print_usage(int argc, char **argv, const whisper_local_stream_params &params);
 
-bool whisper_params_parse(int argc, char **argv, whisper_params &params) {
+bool whisper_params_parse(int argc, char **argv, whisper_local_stream_params &params) {
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
 
@@ -128,7 +128,7 @@ bool whisper_params_parse(int argc, char **argv, whisper_params &params) {
   return true;
 }
 
-void whisper_print_usage(int /*argc*/, char **argv, const whisper_params &params) {
+void whisper_print_usage(int /*argc*/, char **argv, const whisper_local_stream_params &params) {
   fprintf(stderr, "\n");
   fprintf(stderr, "usage: %s [options] file0.wav file1.wav ...\n", argv[0]);
   fprintf(stderr, "\n");
@@ -141,7 +141,7 @@ void whisper_print_usage(int /*argc*/, char **argv, const whisper_params &params
 }
 
 struct whisper_print_user_data {
-  const whisper_params *params;
+  const whisper_local_stream_params *params;
 
   const std::vector<std::vector<float>> *pcmf32s;
   int progress_prev;
@@ -298,7 +298,7 @@ char *escape_double_quotes_and_backslashes(const char *str) {
 
 int main(int argc, char **argv) {
   printf("start\n");
-  whisper_params params;
+  whisper_local_stream_params params;
 
   if (whisper_params_parse(argc, argv, params) == false) {
     whisper_print_usage(argc, argv, params);

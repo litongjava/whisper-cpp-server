@@ -19,7 +19,7 @@ bool is_file_exist(const char *fileName) {
 }
 
 int main(int argc, char **argv) {
-  whisper_params params;
+  whisper_local_stream_params params;
   server_params sparams;
 
   std::mutex whisper_mutex;
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
   svr.set_write_timeout(sparams.write_timeout);
 
   if (!svr.bind_to_port(sparams.hostname, sparams.port)) {
-    fprintf(stderr, "\ncouldn't bind to server socket: hostname=%s port=%d\n\n",
+    fprintf(stderr, "\ncouldn't bind to service socket: hostname=%s port=%d\n\n",
             sparams.hostname.c_str(), sparams.port);
     return 1;
   }
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
   svr.set_base_dir(sparams.public_path);
 
   // to make it ctrl+clickable:
-  printf("\nwhisper server listening at http://%s:%d\n\n", sparams.hostname.c_str(), sparams.port);
+  printf("\nwhisper service listening at http://%s:%d\n\n", sparams.hostname.c_str(), sparams.port);
 
   if (!svr.listen_after_bind()) {
     return 1;

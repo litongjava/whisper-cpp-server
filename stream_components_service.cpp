@@ -3,10 +3,10 @@
 using namespace stream_components;
 
 
-// -- WhisperServer --
+// -- WhisperService --
 
-WhisperServer::WhisperServer(
-  const struct server_params &server_params,
+WhisperService::WhisperService(
+  const struct service_params &server_params,
   const struct audio_params &audio_params) :
   server_params(server_params),
   audio_params(audio_params),
@@ -36,12 +36,12 @@ WhisperServer::WhisperServer(
   }
 }
 
-WhisperServer::~WhisperServer() {
+WhisperService::~WhisperService() {
   whisper_print_timings(ctx);
   whisper_free(ctx);
 }
 
-WhisperOutputPtr WhisperServer::process(const float *samples, int sample_count) {
+WhisperOutputPtr WhisperService::process(const float *samples, int sample_count) {
   whisper_full_params wparams = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
 
   wparams.print_progress = false;
@@ -97,7 +97,7 @@ WhisperOutputPtr WhisperServer::process(const float *samples, int sample_count) 
     }
   }
 
-  auto r = std::make_shared<WhisperOutput>(ctx, server_params);
+  auto r = std::make_shared<WhisperStreamOutput>(ctx, server_params);
 
   return r;
 }

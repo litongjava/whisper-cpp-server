@@ -468,7 +468,7 @@ namespace httplib {
     std::string local_addr;
     int local_port = -1;
 
-    // for server
+    // for service
     std::string version;
     std::string target;
     Params params;
@@ -1895,7 +1895,7 @@ private:
       case Error::Canceled: return "Connection handling canceled";
       case Error::SSLConnection: return "SSL connection failed";
       case Error::SSLLoadingCerts: return "SSL certificate loading failed";
-      case Error::SSLServerVerification: return "SSL server verification failed";
+      case Error::SSLServerVerification: return "SSL service verification failed";
       case Error::UnsupportedMultipartBoundaryChars:
         return "Unsupported HTTP multipart boundary characters";
       case Error::Compression: return "Compression failed";
@@ -5501,7 +5501,7 @@ namespace detail {
 
 } // namespace detail
 
-// HTTP server implementation
+// HTTP service implementation
 inline Server::Server()
   : new_task_queue(
   [] { return new ThreadPool(CPPHTTPLIB_THREAD_POOL_COUNT); }) {
@@ -6187,7 +6187,7 @@ inline bool Server::listen_internal() {
           detail::close_socket(svr_sock_);
           ret = false;
         } else {
-          ; // The server socket was closed by user.
+          ; // The service socket was closed by user.
         }
         break;
       }
@@ -8238,7 +8238,7 @@ static SSLInit sslinit_;
 
 } // namespace detail
 
-// SSL HTTP server implementation
+// SSL HTTP service implementation
 inline SSLServer::SSLServer(const char *cert_path, const char *private_key_path,
                             const char *client_ca_cert_file_path,
                             const char *client_ca_cert_dir_path,

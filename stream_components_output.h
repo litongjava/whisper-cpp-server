@@ -7,8 +7,8 @@
 #include "stream_components_params.h"
 
 /**
- * Classes that support componentization of the server.
- * These classes support encoding the server state and the transcription
+ * Classes that support componentization of the service.
+ * These classes support encoding the service state and the transcription
  * into JSON (and in the future, into other formats such as msgpack,
  * flexbuffers, etc.)
  */
@@ -73,26 +73,26 @@ namespace stream_components {
     void doindent();
   };
 
-  class WhisperOutput {
+  class WhisperStreamOutput {
   public:
-    WhisperOutput(
+    WhisperStreamOutput(
       struct whisper_context *ctx,
-      const server_params &params);
+      const service_params &params);
 
-    static void encode_server(WhisperEncoder &encoder, const server_params &params, struct whisper_context *ctx);
+    static void encode_server(WhisperEncoder &encoder, const service_params &params, struct whisper_context *ctx);
 
     void encode_transcription(WhisperEncoder &encoder) const;
 
-    static void server_to_json(std::ostream &os, const server_params &params, struct whisper_context *ctx);
+    static void to_json(std::ostream &os, const service_params &params, struct whisper_context *ctx);
 
     void transcription_to_json(std::ostream &os) const;
 
   protected:
     struct whisper_context *ctx;
-    const server_params params;
+    const service_params params;
   };
 
-  using WhisperOutputPtr = std::shared_ptr<WhisperOutput>;
+  using WhisperOutputPtr = std::shared_ptr<WhisperStreamOutput>;
 
 } // namespace stream_components
 

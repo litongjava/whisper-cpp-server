@@ -5,5 +5,5 @@
 
 using namespace httplib;
 
-void handleInference(const Request &req, Response &res, std::mutex &whisper_mutex, whisper_params &params,
+void handleInference(const Request &req, Response &res, std::mutex &whisper_mutex, whisper_local_stream_params &params,
                      whisper_context *ctx, char *arg_audio_file);

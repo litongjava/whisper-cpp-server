@@ -15,7 +15,7 @@ const std::string srt_format = "srt";
 const std::string vjson_format = "verbose_json";
 const std::string vtt_format = "vtt";
 
-struct whisper_params {
+struct whisper_local_stream_params {
   int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
   int32_t n_processors = 1;
   int32_t offset_t_ms = 0;
@@ -68,5 +68,5 @@ struct server_params {
   int32_t write_timeout = 600;
 };
 
-void whisper_print_usage(int /*argc*/, char **argv, const whisper_params &params,const server_params &sparams);
-bool whisper_params_parse(int argc, char **argv, whisper_params &params, server_params &sparams);
+void whisper_print_usage(int /*argc*/, char **argv, const whisper_local_stream_params &params, const server_params &sparams);
+bool whisper_params_parse(int argc, char **argv, whisper_local_stream_params &params, server_params &sparams);

@@ -10,21 +10,21 @@ using std::shared_ptr;
 namespace stream_components {
 
 /**
- * Encapsulates the Whisper server.
+ * Encapsulates the Whisper service.
  */
-class WhisperServer {
+class WhisperService {
   public:
-    WhisperServer(
-      const struct server_params &server_params,
+    WhisperService(
+      const struct service_params &server_params,
       const struct audio_params &audio_params);
 
-    ~WhisperServer();
+    ~WhisperService();
 
     WhisperOutputPtr process(
       const float *samples,
       int size);
 
-    server_params server_params;
+    service_params server_params;
     audio_params audio_params;
 
     struct whisper_context *ctx;

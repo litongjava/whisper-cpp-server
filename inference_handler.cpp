@@ -7,7 +7,7 @@
 using json = nlohmann::json;
 
 struct whisper_print_user_data {
-  const whisper_params *params;
+  const whisper_local_stream_params *params;
 
   const std::vector<std::vector<float>> *pcmf32s;
   int progress_prev;
@@ -149,7 +149,7 @@ void whisper_print_segment_callback(struct whisper_context *ctx, struct whisper_
 }
 
 std::string
-output_str(struct whisper_context *ctx, const whisper_params &params, std::vector<std::vector<float>> pcmf32s) {
+output_str(struct whisper_context *ctx, const whisper_local_stream_params &params, std::vector<std::vector<float>> pcmf32s) {
   std::stringstream result;
   const int n_segments = whisper_full_n_segments(ctx);
   for (int i = 0; i < n_segments; ++i) {
@@ -178,7 +178,7 @@ void whisper_print_progress_callback(struct whisper_context * /*ctx*/, struct wh
   }
 }
 
-void getReqParameters(const Request &req, whisper_params &params) {
+void getReqParameters(const Request &req, whisper_local_stream_params &params) {
 // user model configu.has_fileion
   if (req.has_file("offset-t")) {
     params.offset_t_ms = std::stoi(req.get_file_value("offset-t").content);
@@ -204,9 +204,9 @@ void getReqParameters(const Request &req, whisper_params &params) {
 }
 
 
-void getReqParameters(const Request &request, whisper_params &params);
+void getReqParameters(const Request &request, whisper_local_stream_params &params);
 
-void handleInference(const Request &req, Response &res, std::mutex &whisper_mutex, whisper_params &params,
+void handleInference(const Request &req, Response &res, std::mutex &whisper_mutex, whisper_local_stream_params &params,
                      whisper_context *ctx, char *arg_audio_file) {
 // aquire whisper model mutex lock
   whisper_mutex.lock();

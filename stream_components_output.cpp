@@ -122,19 +122,19 @@ void WhisperEncoderJSON::doindent() {
 }
 
 
-// -- WhisperOutput --
+// -- WhisperStreamOutput --
 
-WhisperOutput::WhisperOutput(
+WhisperStreamOutput::WhisperStreamOutput(
   struct whisper_context *ctx,
-  const server_params &params) :
+  const service_params &params) :
   ctx(ctx),
   params(params) {
 
 }
 
-void WhisperOutput::encode_server(
+void WhisperStreamOutput::encode_server(
   WhisperEncoder &encoder,
-  const server_params &params,
+  const service_params &params,
   struct whisper_context *ctx) {
   encoder.reset();
 
@@ -167,7 +167,7 @@ void WhisperOutput::encode_server(
   encoder.end_obj(true);
 }
 
-void WhisperOutput::encode_transcription(WhisperEncoder &encoder) const {
+void WhisperStreamOutput::encode_transcription(WhisperEncoder &encoder) const {
   encoder.reset();
 
   encoder.start_obj(nullptr);
@@ -223,12 +223,12 @@ void WhisperOutput::encode_transcription(WhisperEncoder &encoder) const {
   encoder.end_obj(true);
 }
 
-void WhisperOutput::server_to_json(std::ostream &os, const server_params &params, struct whisper_context *ctx) {
+void WhisperStreamOutput::to_json(std::ostream &os, const service_params &params, struct whisper_context *ctx) {
   WhisperEncoderJSON encoder(os);
-  WhisperOutput::encode_server(encoder, params, ctx);
+  WhisperStreamOutput::encode_server(encoder, params, ctx);
 }
 
-void WhisperOutput::transcription_to_json(std::ostream &os) const {
+void WhisperStreamOutput::transcription_to_json(std::ostream &os) const {
   WhisperEncoderJSON encoder(os);
   encode_transcription(encoder);
 }
