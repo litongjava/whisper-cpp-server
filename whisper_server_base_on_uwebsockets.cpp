@@ -98,17 +98,19 @@ int main(int argc, char **argv) {
       printf("isOk:%d\n", isOk);
       if (isOk) {
         nlohmann::json response;
-        std::string result;
+        nlohmann::json results = nlohmann::json::array(); // create JSON Array
 
         const int n_segments = whisper_full_n_segments(whisperService.ctx);
-        printf("n_segments:%d\n", n_segments);
         for (int i = 0; i < n_segments; ++i) {
-          const char *text = whisper_full_get_segment_text(whisperService.ctx, i);
-          const int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
-          const int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
-          printf("%lld-->%lld:%s\n", t0, t1, text);
+          nlohmann::json segment;
+          segment["t0"] = whisper_full_get_segment_t0(whisperService.ctx, i);
+          segment["t1"] = whisper_full_get_segment_t1(whisperService.ctx, i);
+          segment["sentence"] = whisper_full_get_segment_text(whisperService.ctx, i);
+
+          results.push_back(segment);
         }
-        response["result"] = result;
+
+        response["result"] = results;
         ws->send(response.dump(), uWS::OpCode::TEXT);
       }
     }

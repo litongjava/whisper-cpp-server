@@ -69,33 +69,46 @@ bool WhisperService::process(const float *samples, int sample_count) {
   wparams.prompt_n_tokens = service_params.no_context ? 0 : prompt_tokens.size();
 
   // *** Run the actual inference!!! ***
-  //if (whisper_full(ctx, wparams, samples, sample_count) != 0) {
-  if (whisper_full_parallel(ctx, wparams, samples, sample_count,service_params.n_processors) != 0) {
+  if (whisper_full(ctx, wparams, samples, sample_count) != 0) {
     return false;
   }
+  //if (whisper_full_parallel(ctx, wparams, samples, sample_count,service_params.n_processors) != 0) {
+  // error:ggml_metal_get_buffer: error: buffer is nil
+  //return false;
 
-  // Now sure whether n_iter and n_new_line should have ever been there...
-  // *** SUSPICIOUS what happens by removing them? Are they essential?
-  //if (!use_vad && (n_iter % n_new_line) == 0) {
-  if (!audio_params.use_vad) {
-    //printf("\n");
 
-    // keep part of the audio for next iteration to try to mitigate word boundary issues
-    // *** I don't know if we need this...
-    //pcmf32_old = std::vector<float>(pcmf32.end() - n_samples_keep, pcmf32.end());
+// Now sure whether n_iter and n_new_line should have ever been there...
+// *** SUSPICIOUS what happens by removing them? Are they essential?
+//if (!use_vad && (n_iter % n_new_line) == 0) {
+//  if (!audio_params.use_vad) {
+//printf("\n");
 
-    // Add tokens of the last full length segment as the prompt
-    if (!service_params.no_context) {
-      prompt_tokens.clear();
+// keep part of the audio for next iteration to try to mitigate word boundary issues
+// *** I don't know if we need this...
+//pcmf32_old = std::vector<float>(pcmf32.end() - n_samples_keep, pcmf32.end());
 
-      const int n_segments = whisper_full_n_segments(ctx);
-      for (int i = 0; i < n_segments; ++i) {
-        const int token_count = whisper_full_n_tokens(ctx, i);
-        for (int j = 0; j < token_count; ++j) {
-          prompt_tokens.push_back(whisper_full_get_token_id(ctx, i, j));
-        }
-      }
-    }
-  }
+// Add tokens of the last full length segment as the prompt
+//    if (!service_params.no_context) {
+//      prompt_tokens.
+//
+//        clear();
+//
+//      const int n_segments = whisper_full_n_segments(ctx);
+//      for (
+//        int i = 0;
+//        i < n_segments;
+//        ++i) {
+//        const int token_count = whisper_full_n_tokens(ctx, i);
+//        for (
+//          int j = 0;
+//          j < token_count;
+//          ++j) {
+//          prompt_tokens.
+//            push_back(whisper_full_get_token_id(ctx, i, j)
+//          );
+//        }
+//      }
+//    }
+//  }
   return true;
 }
