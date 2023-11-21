@@ -76,8 +76,10 @@ int main(int argc, char **argv) {
       }
     } else if (opCode == uWS::OpCode::BINARY) {
       // 处理二进制消息（PCM16 数据）
-      std::vector<int16_t> pcm16(message.size() / 2);
-      std::memcpy(pcm16.data(), message.data(), message.size());
+      auto size = message.size();
+      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", __func__, size);
+      std::vector<int16_t> pcm16(size / 2);
+      std::memcpy(pcm16.data(), message.data(), size);
 
       // 将 PCM16 数据转换为 float
       std::vector<float> pcmf32(pcm16.size());
