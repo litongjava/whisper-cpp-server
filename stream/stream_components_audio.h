@@ -2,8 +2,8 @@
 #define WHISPER_STREAM_COMPONENTS_AUDIO_H
 
 #include <whisper.h>
-#include "common-sdl.h"
-#include "common.h"
+#include "../common/common-sdl.h"
+#include "../common/common.h"
 #include "stream_components_params.h"
 
 

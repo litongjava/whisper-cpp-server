@@ -1,7 +1,7 @@
 #include "whisper.h"
-#include "httplib.h"
-#include "whisper_params.h"
-#include "inference_handler.h"
+#include "httplib/httplib.h"
+#include "params/whisper_params.h"
+#include "handler/inference_handler.h"
 #include <fstream>
 #include <cstdio>
 #include <string>

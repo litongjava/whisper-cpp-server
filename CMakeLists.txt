@@ -38,22 +38,22 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif ()
 
 
-add_executable(sdl_version sdl_version.cpp)
+add_executable(sdl_version examples/sdl_version.cpp)
 target_link_libraries(sdl_version ${SDL2_LIBRARIES})
 
-add_executable(simplest simplest.cpp common.cpp)
+add_executable(simplest examples/simplest.cpp common/common.cpp)
 target_link_libraries(simplest whisper)
 
-add_executable(stream_local stream_local.cpp common.cpp common-sdl.cpp
-        stream_components_service.cpp stream_components_audio.cpp
-        stream_components_output.cpp
+add_executable(stream_local examples/stream_local.cpp common/common.cpp common/common-sdl.cpp
+        stream/stream_components_service.cpp stream/stream_components_audio.cpp
+        stream/stream_components_output.cpp
 )
 target_link_libraries(stream_local whisper ${SDL2_LIBRARIES})
 
-add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp common.cpp httplib.h nlohmann/json.hpp inference_handler.cpp whisper_params.cpp)
+add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp common/common.cpp httplib/httplib.h nlohmann/json.hpp handler/inference_handler.cpp params/whisper_params.cpp)
 target_link_libraries(whisper_http_server_base_httplib whisper)
 
-add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp stream_components_service.cpp)
+add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp stream/stream_components_service.cpp)
 #添加头文件
 target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${UWEBSOCKETS_INCLUDE_DIRS})
 # 链接 uWebSockets、zlib、libuv 和 uSockets 库

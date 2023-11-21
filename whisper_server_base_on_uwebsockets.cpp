@@ -1,7 +1,7 @@
 #include "nlohmann/json.hpp"
-#include "stream_components_params.h"
-#include "stream_components_service.h"
-#include "stream_components.h"
+#include "stream/stream_components_params.h"
+#include "stream/stream_components_service.h"
+#include "stream/stream_components.h"
 
 #include <uwebsockets/App.h>
 #include <iostream>
@@ -71,13 +71,13 @@ int main(int argc, char **argv) {
     res->end("Hello World!");
   };
 
-  // WebSocket /echo 处理器
+  // WebSocket /echo handler
   auto ws_echo_handler = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
     ws->send(message, opCode);
   };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  std::vector<float> audioBuffer; // global audio data buffer点击并应用
+  std::vector<float> audioBuffer; // global audio data buffer
   auto ws_streaming_handler = [&whisperService, &audioBuffer](auto *ws, std::string_view message, uWS::OpCode opCode) {
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
       // process binary message（PCM16 data）
       auto size = message.size();
       printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
-      // 将接收到的 PCM16 数据追加到音频缓存
+      // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), message.data(), size);
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
         return static_cast<float>(sample) / 32768.0f; // convert to  [-1.0, 1.0] float
       });
 
-      // 语音识别处理
+      // asr
       bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
       printf("%s: isOk:%d\n", get_current_time().c_str(), isOk);
       if (isOk) {
@@ -135,10 +135,14 @@ int main(int argc, char **argv) {
     }
   };
 
-  // 设置 uWebSockets 应用
+  // config uWebSockets app
   uWS::App()
+    //hello
     .get("/hello", hello_action)
+      //echo
     .ws<std::string>("/echo", {.message = ws_echo_handler})
+      //streaming
     .ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler})
+      //listen
     .listen(port, started_handler).run();
 }

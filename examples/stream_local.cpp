@@ -1,9 +1,9 @@
 #include <iostream>
-#include "stream_components_audio.h"
-#include "stream_components_params.h"
-#include "stream_components_output.h"
-#include "stream_components_service.h"
-#include "stream_components.h"
+#include "../stream/stream_components_audio.h"
+#include "../stream/stream_components_params.h"
+#include "../stream/stream_components_output.h"
+#include "../stream/stream_components_service.h"
+#include "../stream/stream_components.h"
 //#include "json.hpp"
 
 using namespace stream_components;

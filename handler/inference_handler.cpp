@@ -1,8 +1,8 @@
 #include <whisper.h>
 #include "inference_handler.h"
-#include "common.h"
-#include "whisper_params.h"
-#include "nlohmann/json.hpp"
+#include "../common/common.h"
+#include "../params/whisper_params.h"
+#include "../nlohmann/json.hpp"
 
 using json = nlohmann::json;
 

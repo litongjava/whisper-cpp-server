@@ -6,7 +6,7 @@
 // use your favorite implementations
 #define DR_WAV_IMPLEMENTATION
 
-#include "dr_wav.h"
+#include "../dr_libs/dr_wav.h"
 
 #include <cmath>
 #include <cstring>
