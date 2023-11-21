@@ -71,7 +71,13 @@ int main(int argc, char **argv) {
       try {
         auto jsonMsg = nlohmann::json::parse(message);
         std::string signal = jsonMsg["signal"];
-        // process logic...
+        if (signal == "start") {
+          // 发送服务器准备好的消息
+          nlohmann::json response = {{"status", "ok"},
+                                     {"signal", "server_ready"}};
+          ws->send(response.dump(), uWS::OpCode::TEXT);
+        }
+        // other process logic...
       } catch (const std::exception &e) {
         std::cerr << "JSON parse error: " << e.what() << std::endl;
       }
@@ -84,19 +90,26 @@ int main(int argc, char **argv) {
       std::memcpy(pcm16.data(), message.data(), size);
 
       std::transform(pcm16.begin(), pcm16.end(), std::back_inserter(audioBuffer), [](int16_t sample) {
-        return static_cast<float>(sample) / 32768.0f; // 转换为 [-1.0, 1.0] 浮点
+        return static_cast<float>(sample) / 32768.0f; // convert to  [-1.0, 1.0] float
       });
 
       // 语音识别处理
       bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
       printf("isOk:%d\n", isOk);
-      const int n_segments = whisper_full_n_segments(whisperService.ctx);
-      printf("n_segments:%d\n", n_segments);
-      for (int i = 0; i < n_segments; ++i) {
-        const char *text = whisper_full_get_segment_text(whisperService.ctx, i);
-        const int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
-        const int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
-        printf("%lld-->%lld:%s\n", t0, t1, text);
+      if (isOk) {
+        nlohmann::json response;
+        std::string result;
+
+        const int n_segments = whisper_full_n_segments(whisperService.ctx);
+        printf("n_segments:%d\n", n_segments);
+        for (int i = 0; i < n_segments; ++i) {
+          const char *text = whisper_full_get_segment_text(whisperService.ctx, i);
+          const int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
+          const int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
+          printf("%lld-->%lld:%s\n", t0, t1, text);
+        }
+        response["result"] = result;
+        ws->send(response.dump(), uWS::OpCode::TEXT);
       }
     }
   };
