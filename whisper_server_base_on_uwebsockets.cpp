@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <whisper.h>
+#include <sstream>
 
 using namespace stream_components;
 
