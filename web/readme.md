@@ -6,8 +6,7 @@ step1: 开启流式语音识别服务器端
 
 ```
 # 开启流式语音识别服务
-cd PaddleSpeech/demos/streaming_asr_server
-paddlespeech_server start --config_file conf/ws_conformer_wenetspeech_application_faster.yaml
+./cmake-build-debug/whisper_server_base_on_uwebsockets -m models/ggml-base.en.bin
 ```
 
 step2: 谷歌游览器打开 `web`目录下`index.html`
