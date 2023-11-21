@@ -1,8 +1,7 @@
 #include "nlohmann/json.hpp"
-#include "stream/stream_components_params.h"
 #include "stream/stream_components_service.h"
 #include "stream/stream_components.h"
-
+#include "utils/utils.h"
 #include <uwebsockets/App.h>
 #include <iostream>
 #include <string>
@@ -10,19 +9,6 @@
 #include <sstream>
 
 using namespace stream_components;
-
-std::string get_current_time() {
-  auto now = std::chrono::system_clock::now();
-  auto now_c = std::chrono::system_clock::to_time_t(now);
-  auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-
-  std::stringstream current_time_ss;
-  current_time_ss << std::put_time(std::localtime(&now_c), "%y-%m-%d %H:%M:%S")
-                  << '.' << std::setfill('0') << std::setw(3) << milliseconds.count();
-
-  std::string current_time = current_time_ss.str();
-  return current_time;
-}
 
 int main(int argc, char **argv) {
   // Read parameters...
