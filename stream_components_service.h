@@ -24,7 +24,7 @@ namespace stream_components {
 
     bool process(const float *samples,int size);
 
-    service_params server_params;
+    service_params service_params;
     audio_params audio_params;
 
     struct whisper_context *ctx;
