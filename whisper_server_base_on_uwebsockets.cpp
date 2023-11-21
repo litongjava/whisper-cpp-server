@@ -10,6 +10,19 @@
 
 using namespace stream_components;
 
+std::string get_current_time() {
+  auto now = std::chrono::system_clock::now();
+  auto now_c = std::chrono::system_clock::to_time_t(now);
+  auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+
+  std::stringstream current_time_ss;
+  current_time_ss << std::put_time(std::localtime(&now_c), "%y-%m-%d %H:%M:%S")
+                  << '.' << std::setfill('0') << std::setw(3) << milliseconds.count();
+
+  std::string current_time = current_time_ss.str();
+  return current_time;
+}
+
 int main(int argc, char **argv) {
   // Read parameters...
   whisper_local_stream_params params;
@@ -66,7 +79,8 @@ int main(int argc, char **argv) {
   std::vector<float> audioBuffer; // global audio data buffer点击并应用
   auto ws_streaming_handler = [&whisperService, &audioBuffer](auto *ws, std::string_view message, uWS::OpCode opCode) {
     if (opCode == uWS::OpCode::TEXT) {
-      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", __func__, std::string(message).c_str());
+      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
+             std::string(message).c_str());
       // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
@@ -84,7 +98,7 @@ int main(int argc, char **argv) {
     } else if (opCode == uWS::OpCode::BINARY) {
       // process binary message（PCM16 data）
       auto size = message.size();
-      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", __func__, size);
+      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // 将接收到的 PCM16 数据追加到音频缓存
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), message.data(), size);
@@ -95,7 +109,7 @@ int main(int argc, char **argv) {
 
       // 语音识别处理
       bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-      printf("isOk:%d\n", isOk);
+      printf("%s: isOk:%d\n", get_current_time().c_str(), isOk);
       if (isOk) {
         nlohmann::json response;
         nlohmann::json results = nlohmann::json::array(); // create JSON Array
@@ -103,10 +117,14 @@ int main(int argc, char **argv) {
         const int n_segments = whisper_full_n_segments(whisperService.ctx);
         for (int i = 0; i < n_segments; ++i) {
           nlohmann::json segment;
-          segment["t0"] = whisper_full_get_segment_t0(whisperService.ctx, i);
-          segment["t1"] = whisper_full_get_segment_t1(whisperService.ctx, i);
-          segment["sentence"] = whisper_full_get_segment_text(whisperService.ctx, i);
-
+          int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
+          int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
+          const char *sentence = whisper_full_get_segment_text(whisperService.ctx, i);
+          auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
+          printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
+          segment["t0"] = t0;
+          segment["t1"] = t1;
+          segment["sentence"] = sentence;
           results.push_back(segment);
         }
 
