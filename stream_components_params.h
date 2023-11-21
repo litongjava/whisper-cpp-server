@@ -3,7 +3,7 @@
 
 #include <string>
 #include <thread>
-
+#include "whisper.h"
 namespace stream_components {
 
   struct audio_params {
@@ -53,7 +53,7 @@ namespace stream_components {
 
     void initialize() {}
   };
-
 } // namespace stream_components
+
 
 #endif // WHISPER_STREAM_COMPONENTS_PARAMS_H

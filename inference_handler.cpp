@@ -2,7 +2,7 @@
 #include "inference_handler.h"
 #include "common.h"
 #include "whisper_params.h"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
