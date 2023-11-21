@@ -62,33 +62,33 @@ int main(int argc, char **argv) {
     ws->send(message, opCode);
   };
 
-  // WebSocket /paddlespeech/asr/streaming 处理器
-  auto ws_streaming_handler = [&whisperService](auto *ws, std::string_view message, uWS::OpCode opCode) {
+  // WebSocket /paddlespeech/asr/streaming handler
+  std::vector<float> audioBuffer; // global audio data buffer点击并应用
+  auto ws_streaming_handler = [&whisperService, &audioBuffer](auto *ws, std::string_view message, uWS::OpCode opCode) {
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", __func__, std::string(message).c_str());
-      // 处理文本消息（假设是 JSON）
+      // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
         std::string signal = jsonMsg["signal"];
-        // 处理逻辑...
+        // process logic...
       } catch (const std::exception &e) {
-        std::cerr << "JSON 解析错误: " << e.what() << std::endl;
+        std::cerr << "JSON parse error: " << e.what() << std::endl;
       }
     } else if (opCode == uWS::OpCode::BINARY) {
-      // 处理二进制消息（PCM16 数据）
+      // process binary message（PCM16 data）
       auto size = message.size();
       printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", __func__, size);
+      // 将接收到的 PCM16 数据追加到音频缓存
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), message.data(), size);
 
-      // 将 PCM16 数据转换为 float
-      std::vector<float> pcmf32(pcm16.size());
-      std::transform(pcm16.begin(), pcm16.end(), pcmf32.begin(), [](int16_t sample) {
-        return static_cast<float>(sample) / 32768.0f; // 将 int16 范围转换为 [-1.0, 1.0]
+      std::transform(pcm16.begin(), pcm16.end(), std::back_inserter(audioBuffer), [](int16_t sample) {
+        return static_cast<float>(sample) / 32768.0f; // 转换为 [-1.0, 1.0] 浮点
       });
 
       // 语音识别处理
-      bool isOk = whisperService.process(pcmf32.data(), pcmf32.size());
+      bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
       printf("isOk:%d\n", isOk);
       const int n_segments = whisper_full_n_segments(whisperService.ctx);
       printf("n_segments:%d\n", n_segments);
