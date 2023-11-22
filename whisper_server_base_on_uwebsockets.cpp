@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     thread_local wav_writer wavWriter;
     std::string filename;
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
-    nlohmann::json results = nlohmann::json(nlohmann::json::array());
+    nlohmann::json final_results = nlohmann::json(nlohmann::json::array());
 
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           nlohmann::json response = {{"name",   filename},
                                      {"signal", signal},
-                                     {"result", results}};
+                                     {"result", final_results}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
         }
         // other process logic...
@@ -119,6 +119,7 @@ int main(int argc, char **argv) {
       bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
       if (isOk) {
         const int n_segments = whisper_full_n_segments(whisperService.ctx);
+        nlohmann::json results = nlohmann::json(nlohmann::json::array());
         for (int i = 0; i < n_segments; ++i) {
           nlohmann::json segment;
           int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
@@ -131,6 +132,7 @@ int main(int argc, char **argv) {
           segment["sentence"] = sentence;
           results.push_back(segment);
         }
+        final_results=results;
         response["result"] = results;
       }
 
