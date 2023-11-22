@@ -58,60 +58,66 @@ int main(int argc, char **argv) {
   };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  std::vector<float> * audioBuffer; // global audio data buffer
-  wav_writer * wavWriter;
+  auto ws_streaming_handler = [&whisperService](auto *ws, std::string_view message, uWS::OpCode opCode) {
+    thread_local std::vector<float> audioBuffer; //thread-localized variable
+    thread_local wav_writer wavWriter;
+    std::string filename;
+    //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
+    nlohmann::json results = nlohmann::json(nlohmann::json::array());
 
-  auto ws_streaming_handler = [&whisperService, &audioBuffer, &wavWriter](auto *ws, std::string_view message,
-                                                                     uWS::OpCode opCode) {
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
              std::string(message).c_str());
       // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
-        std::string filename = jsonMsg["name"];
+        if (jsonMsg["name"].is_string()) {
+          filename = jsonMsg["name"];
+        } else {
+          filename = std::to_string(get_current_time_millis()) + ".wav";
+        }
         std::string signal = jsonMsg["signal"];
         if (signal == "start") {
           // 发送服务器准备好的消息
           nlohmann::json response = {{"status", "ok"},
                                      {"signal", "server_ready"}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
-          wavWriter = new wav_writer();
-          audioBuffer = new std::vector<float>();
-          wavWriter->open(filename, WHISPER_SAMPLE_RATE, 16, 1);
+          wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
         }
         if (signal == "end") {
-          delete wavWriter;
-          delete audioBuffer;
+          wavWriter.close();
+//          nlohmann::json response = {{"name",filename},{"signal", signal}};
+          nlohmann::json response = {{"name",   filename},
+                                     {"signal", signal},
+                                     {"result", results}};
+          ws->send(response.dump(), uWS::OpCode::TEXT);
         }
         // other process logic...
       } catch (const std::exception &e) {
         std::cerr << "JSON parse error: " << e.what() << std::endl;
       }
     } else if (opCode == uWS::OpCode::BINARY) {
+      nlohmann::json response;
+
       // process binary message（PCM16 data）
       auto size = message.size();
+
       printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
       std::memcpy(pcm16.data(), data, size);
 
-      std::vector<float> temp(size/2);
+      std::vector<float> temp(size / 2);
       std::transform(pcm16.begin(), pcm16.end(), temp.begin(), [](int16_t sample) {
         return static_cast<float>(sample) / 32768.0f;
       });
-      wavWriter->write(temp.data(), size/2);
-
-      audioBuffer->insert(audioBuffer->end(), temp.begin(), temp.end());
-
-
+      //write to file
+      wavWriter.write(temp.data(), size / 2);
+      audioBuffer.insert(audioBuffer.end(), temp.begin(), temp.end());
       // asr
-      nlohmann::json response;
-      bool isOk = whisperService.process(audioBuffer->data(), audioBuffer->size());
+      bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
       if (isOk) {
-        nlohmann::json results = nlohmann::json::array(); // create JSON Array
-
         const int n_segments = whisper_full_n_segments(whisperService.ctx);
         for (int i = 0; i < n_segments; ++i) {
           nlohmann::json segment;

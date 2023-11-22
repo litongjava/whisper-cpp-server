@@ -19,3 +19,8 @@ std::string get_current_time() {
   std::string current_time = current_time_ss.str();
   return current_time;
 }
+
+long get_current_time_millis(){
+  auto start = std::chrono::system_clock::now();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()).count();
+}
