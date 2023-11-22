@@ -19,6 +19,17 @@ message(STATUS "SDL2 libraries: ${SDL2_LIBRARIES}")
 
 include_directories(${SDL2_INCLUDE_DIRS})
 
+# webrtc
+include_directories(webrtc)
+include_directories(.)
+# find cpp files
+file(GLOB SRC_FILES simplevad/*.c simplevad/*.h
+        webrtc/common_audio/*/*.c webrtc/rtc_base/*.c*)
+
+add_executable(audio_vad examples/audio_vad.cpp ${SRC_FILES})
+target_link_libraries(audio_vad pthread)
+
+
 # Detecting Operating Systems
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # macOS
@@ -66,5 +77,6 @@ else ()
     # if others eg. Linux
     target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB libuv::uv ${USOCKETS_LIBRARY})
 endif ()
+
 
 
