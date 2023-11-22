@@ -2,6 +2,7 @@
 #include "stream/stream_components_service.h"
 #include "stream/stream_components.h"
 #include "utils/utils.h"
+#include "common/common.h"
 #include <uwebsockets/App.h>
 #include <iostream>
 #include <string>
@@ -30,20 +31,14 @@ int main(int argc, char **argv) {
     exit(0);
   }
 
-  // Instantiate the microphone input
-  // stream_components::LocalSDLMicrophone microphone(params.audio);
-
   // Instantiate the service
   struct whisper_context_params cparams;
   cparams.use_gpu = params.service.use_gpu;
   stream_components::WhisperService whisperService(params.service, params.audio, cparams);
 
-  // Print the 'header'...
-  //WhisperStreamOutput::to_json(std::cout, params.service, whisperService.ctx);
-
   const int port = 8090;
 
-  // 开始处理器
+  // started handler
   auto started_handler = [](auto *token) {
     if (token) {
       std::cout << "Server started on port " << port << std::endl;
@@ -52,7 +47,7 @@ int main(int argc, char **argv) {
     }
   };
 
-  // HTTP GET /hello 处理器
+  // HTTP GET /hello handler
   auto hello_action = [](auto *res, auto *req) {
     res->end("Hello World!");
   };
@@ -63,20 +58,31 @@ int main(int argc, char **argv) {
   };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  std::vector<float> audioBuffer; // global audio data buffer
-  auto ws_streaming_handler = [&whisperService, &audioBuffer](auto *ws, std::string_view message, uWS::OpCode opCode) {
+  std::vector<float> * audioBuffer; // global audio data buffer
+  wav_writer * wavWriter;
+
+  auto ws_streaming_handler = [&whisperService, &audioBuffer, &wavWriter](auto *ws, std::string_view message,
+                                                                     uWS::OpCode opCode) {
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
              std::string(message).c_str());
       // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
+        std::string filename = jsonMsg["name"];
         std::string signal = jsonMsg["signal"];
         if (signal == "start") {
           // 发送服务器准备好的消息
           nlohmann::json response = {{"status", "ok"},
                                      {"signal", "server_ready"}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
+          wavWriter = new wav_writer();
+          audioBuffer = new std::vector<float>();
+          wavWriter->open(filename, WHISPER_SAMPLE_RATE, 16, 1);
+        }
+        if (signal == "end") {
+          delete wavWriter;
+          delete audioBuffer;
         }
         // other process logic...
       } catch (const std::exception &e) {
@@ -88,17 +94,22 @@ int main(int argc, char **argv) {
       printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
-      std::memcpy(pcm16.data(), message.data(), size);
+      std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
+      std::memcpy(pcm16.data(), data, size);
 
-      std::transform(pcm16.begin(), pcm16.end(), std::back_inserter(audioBuffer), [](int16_t sample) {
-        return static_cast<float>(sample) / 32768.0f; // convert to  [-1.0, 1.0] float
+      std::vector<float> temp(size/2);
+      std::transform(pcm16.begin(), pcm16.end(), temp.begin(), [](int16_t sample) {
+        return static_cast<float>(sample) / 32768.0f;
       });
+      wavWriter->write(temp.data(), size/2);
+
+      audioBuffer->insert(audioBuffer->end(), temp.begin(), temp.end());
+
 
       // asr
-      bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-      printf("%s: isOk:%d\n", get_current_time().c_str(), isOk);
+      nlohmann::json response;
+      bool isOk = whisperService.process(audioBuffer->data(), audioBuffer->size());
       if (isOk) {
-        nlohmann::json response;
         nlohmann::json results = nlohmann::json::array(); // create JSON Array
 
         const int n_segments = whisper_full_n_segments(whisperService.ctx);
@@ -114,10 +125,10 @@ int main(int argc, char **argv) {
           segment["sentence"] = sentence;
           results.push_back(segment);
         }
-
         response["result"] = results;
-        ws->send(response.dump(), uWS::OpCode::TEXT);
       }
+
+      ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
 
