@@ -58,13 +58,15 @@ int main(int argc, char **argv) {
   };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  auto ws_streaming_handler = [&whisperService](auto *ws, std::string_view message, uWS::OpCode opCode) {
+  auto item = [&whisperService](auto *ws, std::string_view message, uWS::OpCode opCode) {
     thread_local std::vector<float> audioBuffer; //thread-localized variable
     thread_local wav_writer wavWriter;
-    std::string filename;
+    thread_local std::string filename;
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
-    nlohmann::json final_results = nlohmann::json(nlohmann::json::array());
-
+    thread_local nlohmann::json final_results;
+    auto thread_id = std::this_thread::get_id();
+    std::cout << get_current_time().c_str() << ": Handling a message in thread: " << thread_id << std::endl;
+    nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
       printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
              std::string(message).c_str());
@@ -78,18 +80,19 @@ int main(int argc, char **argv) {
         }
         std::string signal = jsonMsg["signal"];
         if (signal == "start") {
+          final_results = nlohmann::json(nlohmann::json::array());
           // 发送服务器准备好的消息
-          nlohmann::json response = {{"status", "ok"},
-                                     {"signal", "server_ready"}};
+          response = {{"status", "ok"},
+                      {"signal", "server_ready"}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
           wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
         }
         if (signal == "end") {
           wavWriter.close();
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
-          nlohmann::json response = {{"name",   filename},
-                                     {"signal", signal},
-                                     {"result", final_results}};
+          response = {{"name",   filename},
+                      {"signal", signal}};
+          response["result"] = final_results;
           ws->send(response.dump(), uWS::OpCode::TEXT);
         }
         // other process logic...
@@ -97,8 +100,6 @@ int main(int argc, char **argv) {
         std::cerr << "JSON parse error: " << e.what() << std::endl;
       }
     } else if (opCode == uWS::OpCode::BINARY) {
-      nlohmann::json response;
-
       // process binary message（PCM16 data）
       auto size = message.size();
 
@@ -132,13 +133,14 @@ int main(int argc, char **argv) {
           segment["sentence"] = sentence;
           results.push_back(segment);
         }
-        final_results=results;
-        response["result"] = results;
+        final_results = results;
+        response["result"] = final_results;
       }
 
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
+  auto ws_streaming_handler = item;
 
   // config uWebSockets app
   uWS::App()
