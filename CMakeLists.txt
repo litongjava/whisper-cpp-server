@@ -62,7 +62,7 @@ target_link_libraries(stream_local whisper ${SDL2_LIBRARIES})
 add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp common/common.cpp httplib/httplib.h nlohmann/json.hpp handler/inference_handler.cpp params/whisper_params.cpp)
 target_link_libraries(whisper_http_server_base_httplib whisper)
 
-add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp stream/stream_components_service.cpp utils/utils.cpp)
+add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp stream/stream_components_service.cpp utils/utils.cpp)
 #add uwebsockets head files
 target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${UWEBSOCKETS_INCLUDE_DIRS})
 # linked uWebSockets、zlib、libuv 和 uSockets libs

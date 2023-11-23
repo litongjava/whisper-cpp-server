@@ -179,12 +179,10 @@ private:
   }
 
   // It is assumed that PCM data is normalized to a range from -1 to 1
-  bool write_audio(const float *data, size_t length) {
+  bool write_audio(const int16_t *data, size_t length) {
     for (size_t i = 0; i < length; ++i) {
       // Ensure that the data is in the range of -1 to 1
-      float normalizedSample = std::max(-1.0f, std::min(1.0f, data[i]));
-      const int16_t intSample = static_cast<int16_t>(normalizedSample * 32767);
-      fstream.write(reinterpret_cast<const char *>(&intSample), sizeof(int16_t));
+      fstream.write(reinterpret_cast<const char *>(&data[i]), sizeof(int16_t));
       dataSize += sizeof(int16_t);
 
       // Check if write was successful
@@ -238,7 +236,7 @@ public:
     return true;
   }
 
-  bool write(const float *data, size_t length) {
+  bool write(const int16_t *data, size_t length) {
     return write_audio(data, length);
   }
 

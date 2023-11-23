@@ -9,6 +9,10 @@
 #include <whisper.h>
 #include <sstream>
 
+struct PerSocketData {
+  wav_writer wavWriter;
+};
+
 bool process_vad(float *pDouble, unsigned long size);
 
 std::vector<float> extract_first_voice_segment(std::vector<float> vector1);
@@ -60,9 +64,53 @@ int main(int argc, char **argv) {
   auto ws_echo_handler = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
     ws->send(message, opCode);
   };
+  //Save Audio
+  auto ws_save_handler=[](auto *ws,std::string_view message,uWS::OpCode opCode){
+    std::string* userData = (std::string*)ws->getUserData();
+    printf("%s: User Data: %s\n", get_current_time().c_str(), userData->c_str());
+    thread_local wav_writer wavWriter;
+    thread_local std::string filename;
+
+    nlohmann::json response;
+    if (opCode == uWS::OpCode::TEXT) {
+      printf("%s: Received message on /streaming/save: %s\n", get_current_time().c_str(),
+             std::string(message).c_str());
+      auto jsonMsg = nlohmann::json::parse(message);
+      std::string signal = jsonMsg["signal"];
+      if (signal == "start") {
+        if (jsonMsg["name"].is_string()) {
+          filename = jsonMsg["name"];
+        } else {
+          filename = std::to_string(get_current_time_millis()) + ".wav";
+        }
+        // 发送服务器准备好的消息
+        response = {{"status", "ok"},
+                    {"signal", "server_ready"}};
+        ws->send(response.dump(), uWS::OpCode::TEXT);
+        wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
+      }
+      if (signal == "end") {
+        wavWriter.close();
+        response = {{"name",   filename},
+                    {"signal", signal}};
+        ws->send(response.dump(), uWS::OpCode::TEXT);
+      }
+
+    }else if (opCode == uWS::OpCode::BINARY) {
+      // process binary message（PCM16 data）
+      auto size = message.size();
+      std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
+      printf("%s: Received message size on /streaming/save: %zu\n", get_current_time().c_str(), size);
+      // add received PCM16 to audio cache
+      std::vector<int16_t> pcm16(size / 2);
+      std::memcpy(pcm16.data(), data, size);
+      //write to file
+      wavWriter.write(pcm16.data(), size / 2);
+    }
+  };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  auto item = [&whisperService, &params](auto *ws, std::string_view message, uWS::OpCode opCode) {
+  auto ws_streaming_handler = [&whisperService, &params](auto *ws, std::string_view message, uWS::OpCode opCode) {
     thread_local std::vector<float> audioBuffer; //thread-localized variable
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
@@ -77,13 +125,13 @@ int main(int argc, char **argv) {
       // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
-        if (jsonMsg["name"].is_string()) {
-          filename = jsonMsg["name"];
-        } else {
-          filename = std::to_string(get_current_time_millis()) + ".wav";
-        }
         std::string signal = jsonMsg["signal"];
         if (signal == "start") {
+          if (jsonMsg["name"].is_string()) {
+            filename = jsonMsg["name"];
+          } else {
+            filename = std::to_string(get_current_time_millis()) + ".wav";
+          }
           final_results = nlohmann::json(nlohmann::json::array());
           // 发送服务器准备好的消息
           response = {{"status", "ok"},
@@ -118,7 +166,7 @@ int main(int argc, char **argv) {
         return static_cast<float>(sample) / 32768.0f;
       });
       //write to file
-      wavWriter.write(temp.data(), size / 2);
+      //wavWriter.write(temp.data(), size / 2);
       audioBuffer.insert(audioBuffer.end(), temp.begin(), temp.end());
       // 如果开启了VAD
       bool isOk = false;
@@ -161,7 +209,7 @@ int main(int argc, char **argv) {
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
-  auto ws_streaming_handler = item;
+
 
   // config uWebSockets app
   uWS::App()
@@ -169,7 +217,13 @@ int main(int argc, char **argv) {
     .get("/hello", hello_action)
       //echo
     .ws<std::string>("/echo", {.message = ws_echo_handler})
-      //streaming
+    //only_save_audio
+    .ws<std::string>("/streaming/save", {.open=[](auto *ws){
+      // 初始化用户数据
+      std::string* userData = (std::string*)ws->getUserData();
+      *userData = "Create User Id";  // 设置初始值
+    },.message = ws_save_handler})
+      //streaming asr
     .ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler})
       //listen
     .listen(port, started_handler).run();
@@ -179,6 +233,3 @@ std::vector<float> extract_first_voice_segment(std::vector<float> vector1) {
   return std::vector<float>();
 }
 
-bool process_vad(float *pDouble, unsigned long size) {
-  return false;
-}
