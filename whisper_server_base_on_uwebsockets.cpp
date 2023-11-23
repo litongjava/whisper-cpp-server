@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 
   // WebSocket /paddlespeech/asr/streaming handler
   auto ws_streaming_handler = [&whisperService, &params](auto *ws, std::string_view message, uWS::OpCode opCode) {
-    thread_local std::vector<float> audioBuffer; //thread-localized variable
+    thread_local std::vector<int16_t> audioBuffer; //thread-localized variable
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
@@ -160,52 +160,47 @@ int main(int argc, char **argv) {
       std::vector<int16_t> pcm16(size / 2);
 
       std::memcpy(pcm16.data(), data, size);
-
-      std::vector<float> temp(size / 2);
-      std::transform(pcm16.begin(), pcm16.end(), temp.begin(), [](int16_t sample) {
-        return static_cast<float>(sample) / 32768.0f;
-      });
       //write to file
-      //wavWriter.write(temp.data(), size / 2);
-      audioBuffer.insert(audioBuffer.end(), temp.begin(), temp.end());
-      // 如果开启了VAD
-      bool isOk = false;
-      if (params.audio.use_vad) {
-        printf("%s: vad: %n\n", get_current_time().c_str(), params.audio.use_vad);
-        // TODO: 实现VAD处理，这里假设process_vad是一个可以处理音频并返回是否包含有效语音的函数
-        bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
+      wavWriter.write(pcm16.data(), size / 2);
 
-        if (containsVoice) {
-          // 提取第一个有效音频段
-          // TODO: 实现提取第一个有效音频段的逻辑，这里假设extract_first_voice_segment是实现这一功能的函数
-          std::vector<float> firstSegment = extract_first_voice_segment(audioBuffer);
-          // 清除audioBuffer中对应的字节
-          isOk = whisperService.process(firstSegment.data(), firstSegment.size());
+      audioBuffer.insert(audioBuffer.end(), pcm16.begin(), pcm16.end());
+      unsigned long bufferSize = audioBuffer.size();
+      if(bufferSize>16000*10){
+        std::vector<float> pcm32(bufferSize);
+        std::transform(audioBuffer.begin(), audioBuffer.end(), pcm32.begin(), [](int16_t sample) {
+          return static_cast<float>(sample) / 32768.0f;
+        });
+        audioBuffer.clear();
+        // 如果开启了VAD
+        bool isOk = false;
+        if (params.audio.use_vad) {
+          printf("%s: vad: %n\n", get_current_time().c_str(), params.audio.use_vad);
+          // TODO: 实现VAD处理，
+          //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
+          isOk = whisperService.process(pcm32.data(), pcm32.size());
+        } else {
+          // asr
+          isOk = whisperService.process(pcm32.data(), pcm32.size());
         }
-      } else {
-        // asr
-        isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-      }
-      if (isOk) {
-        const int n_segments = whisper_full_n_segments(whisperService.ctx);
-        nlohmann::json results = nlohmann::json(nlohmann::json::array());
-        for (int i = 0; i < n_segments; ++i) {
-          nlohmann::json segment;
-          int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
-          int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
-          const char *sentence = whisper_full_get_segment_text(whisperService.ctx, i);
-          auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
-          printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
-          segment["t0"] = t0;
-          segment["t1"] = t1;
-          segment["sentence"] = sentence;
-          results.push_back(segment);
+        if (isOk) {
+          const int n_segments = whisper_full_n_segments(whisperService.ctx);
+          nlohmann::json results = nlohmann::json(nlohmann::json::array());
+          for (int i = 0; i < n_segments; ++i) {
+            nlohmann::json segment;
+            int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
+            int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
+            const char *sentence = whisper_full_get_segment_text(whisperService.ctx, i);
+            auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
+            printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
+            segment["t0"] = t0;
+            segment["t1"] = t1;
+            segment["sentence"] = sentence;
+            results.push_back(segment);
+          }
+          final_results = results;
+          response["result"] = final_results;
         }
-        final_results = results;
-        response["result"] = final_results;
       }
-
-
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
