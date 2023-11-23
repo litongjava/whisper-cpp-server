@@ -142,8 +142,13 @@ class ASRWsAudioHandler:
       for chunk_data in self.read_wave(wavfile_path):
         await ws.send(chunk_data.tobytes())
         msg = await ws.recv()
-        msg = json.loads(msg)
-        self.logger.info("client receive msg={}".format(msg))
+        if msg:
+          try:
+            parsed_msg = json.loads(msg)
+            self.logger.info("client receive msg={}".format(parsed_msg))
+          except Exception as e:
+            self.logger.error("Unexpected error: {}".format(e))
+
       # 4. we must send finished signal to the server
       audio_info = json.dumps(
         {

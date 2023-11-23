@@ -6,3 +6,7 @@ pip install websockets
 ```shell script
 python client\websocket_client.py --server_ip 192.168.3.7 --port 8090 --wavfile samples/jfk.wav
 ```
+only save audio
+```shell script
+python client\websocket_client.py --server_ip 192.168.3.7 --port 8090 --endpoint /streaming/save --wavfile samples/jfk.wav
+```
