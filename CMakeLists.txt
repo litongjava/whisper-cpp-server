@@ -23,10 +23,10 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(webrtc)
 include_directories(.)
 # find cpp files
-file(GLOB SRC_FILES simplevad/*.c simplevad/*.h
+file(GLOB VAD_FILES simplevad/*.c simplevad/*.h
         webrtc/common_audio/*/*.c webrtc/rtc_base/*.c*)
 
-add_executable(audio_vad examples/audio_vad.cpp ${SRC_FILES})
+add_executable(audio_vad examples/audio_vad.cpp ${VAD_FILES})
 target_link_libraries(audio_vad pthread)
 
 

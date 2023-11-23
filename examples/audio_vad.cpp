@@ -28,7 +28,8 @@ int main(int argc,char** argv) {
     return 3;
   }
 
-  std::unique_ptr<simple_vad, decltype(&simple_vad_free)> vad(simple_vad_create(), &simple_vad_free);
+  std::unique_ptr<simple_vad, decltype(&simple_vad_free)> vad(
+    simple_vad_create(), &simple_vad_free);
   if (!vad) {
     return 4;
   }
@@ -36,7 +37,8 @@ int main(int argc,char** argv) {
   std::unique_ptr<FILE, decltype(&fclose)> fp2(fopen(filename, "rb"), &fclose);
   std::unique_ptr<struct cut_info, decltype(&cut_info_free)> cut(cut_info_create(fp2.get()), &cut_info_free);
 
-  snprintf(cut->output_filename_prefix, sizeof(cut->output_filename_prefix), "%s", output_filename_prefix);
+  snprintf(cut->output_filename_prefix, sizeof(cut->output_filename_prefix), "%s",
+           output_filename_prefix);
   snprintf(cut->output_file_dir, sizeof(cut->output_file_dir), "%s", output_dir);
 
   int res = run(fp.get(), vad.get(), cut.get());
