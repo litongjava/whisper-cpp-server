@@ -86,7 +86,7 @@ struct whisper_local_params {
   std::string language = "en";
   std::string prompt;
   std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
-  std::string model = "models/ggml-base.en.bin";
+  std::string model = "../models/ggml-base.en.bin";
 
   // [TDRZ] speaker turn string
   std::string tdrz_speaker_turn = " [SPEAKER_TURN]"; // TODO: set from command line

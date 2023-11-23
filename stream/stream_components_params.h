@@ -50,7 +50,7 @@ namespace stream_components {
     bool use_gpu = true;
 
     std::string language = "en";
-    std::string model = "models/ggml-base.en.bin";
+    std::string model = "../models/ggml-base.en.bin";
 
     void initialize() {}
   };
