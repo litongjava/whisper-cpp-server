@@ -3,7 +3,7 @@
 #include "../common/common.h"
 #include "../params/whisper_params.h"
 #include "../nlohmann/json.hpp"
-#include "common/utils.h"
+#include "../common/utils.h"
 
 using json = nlohmann::json;
 
@@ -210,55 +210,31 @@ void getReqParameters(const Request &req, whisper_params &params) {
 
 void getReqParameters(const Request &request, whisper_params &params);
 
-void handleInference(const Request &req, Response &res, std::mutex &whisper_mutex, whisper_params &params,
-                     whisper_context *ctx, char *arg_audio_file) {
-// aquire whisper model mutex lock
-  whisper_mutex.lock();
+bool read_audio_file(std::string audio_format, std::string filename, std::vector<float> & pcmf32,
+                     std::vector<std::vector<float>> & pcmf32s, bool diarize) {
 
-  // first check user requested fields of the request
-  if (!req.has_file("file")) {
-    fprintf(stderr, "error: no 'file' field in the request\n");
-    const std::string error_resp = "{\"error\":\"no 'file' field in the request\"}";
-    res.set_content(error_resp, "application/json");
-    whisper_mutex.unlock();
-    return;
-  }
-  auto audio_file = req.get_file_value("file");
-
-  // check non-required fields
-  getReqParameters(req, params);
-
-  std::string filename{audio_file.filename};
-  printf("%s: Received filename: %s,audio_format\n",get_current_time().c_str(),filename.c_str(),params.audio_format.c_str());
-
-  // audio arrays
-  std::vector<float> pcmf32;               // mono-channel F32 PCM
-  std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
-
-  // write file to temporary file
-  std::ofstream temp_file{filename, std::ios::binary};
-  temp_file << audio_file.content;
-
-  // read wav content into pcmf32
-  if(params.audio_format=="mp3"){
-
-  }else if(params.audio_format=="m4a"){
-
-  }else{
-    if (!::read_wav(filename, pcmf32, pcmf32s, params.diarize)) {
+  // read audio content into pcmf32
+  if (audio_format == "mp3") {
+    if (!::read_mp3(filename, pcmf32, pcmf32s, diarize)) {
+      fprintf(stderr, "error: failed to read mp3 file '%s'\n", filename.c_str());
+      return false;
+    }
+  } else if (audio_format == "m4a") {
+    if (!::read_m4a(filename, pcmf32, pcmf32s, diarize)) {
+      fprintf(stderr, "error: failed to read m4a file '%s'\n", filename.c_str());
+      return false;
+    }
+  } else {
+    if (!::read_wav(filename, pcmf32, pcmf32s, diarize)) {
       fprintf(stderr, "error: failed to read WAV file '%s'\n", filename.c_str());
-      const std::string error_resp = "{\"error\":\"failed to read WAV file\"}";
-      res.set_content(error_resp, "application/json");
-      whisper_mutex.unlock();
-      return;
+      return false;
     }
   }
+  return true;
+}
 
-  // remove temp file
-  std::remove(filename.c_str());
-
-  printf("Successfully loaded %s\n", filename.c_str());
-
+bool run(std::mutex &whisper_mutex, whisper_params &params, whisper_context *ctx, std::string filename,
+         const std::vector<std::vector<float>>& pcmf32s, std::vector<float> pcmf32) {
   // print system information
   {
     fprintf(stderr, "\n");
@@ -368,31 +344,87 @@ void handleInference(const Request &req, Response &res, std::mutex &whisper_mute
       wparams.abort_callback_user_data = &is_aborted;
     }
 
+    // aquire whisper model mutex lock
+    whisper_mutex.lock();
     if (whisper_full_parallel(ctx, wparams, pcmf32.data(), pcmf32.size(), params.n_processors) != 0) {
-      fprintf(stderr, "%s: failed to process audio\n", arg_audio_file);
-      const std::string error_resp = "{\"error\":\"failed to process audio\"}";
-      res.set_content(error_resp, "application/json");
+      fprintf(stderr, "%s: failed to process audio\n", filename.c_str());
       whisper_mutex.unlock();
-      return;
+      return false;
     }
+    whisper_mutex.unlock();
+    return true;
   }
-
-  // return results to user
-  if (params.response_format == text_format) {
-    std::string results = output_str(ctx, params, pcmf32s);
-    res.set_content(results.c_str(), "text/html");
-  }
-    // TODO add more output formats
-  else {
-    std::string results = output_str(ctx, params, pcmf32s);
-    json jres = json{
-      {"text", results}
-    };
-    res.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
-                    "application/json");
-  }
-
-  // return whisper model mutex lock
-  whisper_mutex.unlock();
 }
 
+
+void handleInference(const Request &request, Response &response, std::mutex &whisper_mutex, whisper_params &params,
+                     whisper_context *ctx, char *arg_audio_file) {
+  // first check user requested fields of the request
+  if (!request.has_file("file")) {
+    fprintf(stderr, "error: no 'file' field in the request\n");
+    json jres = json{
+      {"code",-1},
+      {"msg", "no 'file' field in the request"}
+    };
+    auto json_string  = jres.dump(-1, ' ', false,json::error_handler_t::replace);
+    response.set_content(json_string,"application/json");
+    return;
+  }
+  auto audio_file = request.get_file_value("file");
+
+  // check non-required fields
+  getReqParameters(request, params);
+
+  std::string filename{audio_file.filename};
+  printf("%s: Received filename: %s,audio_format:%s \n",get_current_time().c_str(),filename.c_str(),params.audio_format.c_str());
+
+  // audio arrays
+  std::vector<float> pcmf32;               // mono-channel F32 PCM
+  std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
+
+  // write file to temporary file
+  std::ofstream temp_file{filename, std::ios::binary};
+  temp_file << audio_file.content;
+
+  bool isOK=read_audio_file(params.audio_format,filename,pcmf32,pcmf32s,params.diarize);
+  if(!isOK){
+    json json_obj={
+      {"code",-1},
+      {"msg","error: failed to read WAV file "}
+    };
+    auto json_string  = json_obj.dump(-1, ' ', false,json::error_handler_t::replace);
+    response.set_content(json_string, "application/json");
+    return;
+  }
+
+  // remove temp file
+  std::remove(filename.c_str());
+
+  printf("Successfully loaded %s\n", filename.c_str());
+
+  bool isOk= run(whisper_mutex, params, ctx, filename, pcmf32s, pcmf32);
+  if(isOk){
+    // return results to user
+    if (params.response_format == text_format) {
+      std::string results = output_str(ctx, params, pcmf32s);
+      response.set_content(results.c_str(), "text/html");
+    }
+      // TODO add more output formats
+    else {
+      std::string results = output_str(ctx, params, pcmf32s);
+      json jres = json{
+        {"code",0},
+        {"text", results}
+      };
+      response.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
+                           "application/json");
+    }
+  }else{
+    json jres = json{
+      {"code",-1},
+      {"msg", "run error"}
+    };
+    auto json_string  = jres.dump(-1, ' ', false,json::error_handler_t::replace);
+    response.set_content(json_string,"application/json");
+  }
+}

@@ -50,7 +50,7 @@ struct whisper_params {
   std::string language = "en";
   std::string prompt = "";
   std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
-  std::string model = "models/ggml-base.en.bin";
+  std::string model = "../models/ggml-base.en.bin";
 
   std::string response_format = json_format;
 

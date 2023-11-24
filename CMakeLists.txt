@@ -59,7 +59,8 @@ add_executable(stream_local examples/stream_local.cpp common/common.cpp common/c
         )
 target_link_libraries(stream_local whisper ${SDL2_LIBRARIES})
 
-add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp common/common.cpp httplib/httplib.h nlohmann/json.hpp handler/inference_handler.cpp params/whisper_params.cpp)
+add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp
+        common/common.cpp common/utils.cpp handler/inference_handler.cpp params/whisper_params.cpp)
 target_link_libraries(whisper_http_server_base_httplib whisper)
 
 add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp stream/stream_components_service.cpp common/utils.cpp)
