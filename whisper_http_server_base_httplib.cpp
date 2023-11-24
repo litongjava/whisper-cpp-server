@@ -13,6 +13,7 @@
 #endif
 
 using namespace httplib;
+
 bool is_file_exist(const char *fileName) {
   std::ifstream infile(fileName);
   return infile.good();
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
     return false;
   });
 
-  svr.Post("/inference",  [&](const httplib::Request &req, httplib::Response &res) {
+  svr.Post("/inference", [&](const httplib::Request &req, httplib::Response &res) {
     handleInference(req, res, whisper_mutex, params, ctx, argv[0]);
   });
   svr.Post("/load", [&](const Request &req, Response &res) {

@@ -1,6 +1,7 @@
 #include "../common/common.h"
 
 #include "whisper.h"
+#include "common/utils.h"
 
 #include <cmath>
 #include <cstdio>
@@ -19,23 +20,6 @@ const std::vector<std::string> k_colors = {
   "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;220m",
   "\033[38;5;226m", "\033[38;5;190m", "\033[38;5;154m", "\033[38;5;118m", "\033[38;5;82m",
 };
-
-//  500 -> 00:05.000
-// 6000 -> 01:00.000
-std::string to_timestamp(int64_t t, bool comma = false) {
-  int64_t msec = t * 10;
-  int64_t hr = msec / (1000 * 60 * 60);
-  msec = msec - hr * (1000 * 60 * 60);
-  int64_t min = msec / (1000 * 60);
-  msec = msec - min * (1000 * 60);
-  int64_t sec = msec / 1000;
-  msec = msec - sec * 1000;
-
-  char buf[32];
-  snprintf(buf, sizeof(buf), "%02d:%02d:%02d%s%03d", (int) hr, (int) min, (int) sec, comma ? "," : ".", (int) msec);
-
-  return std::string(buf);
-}
 
 int timestamp_to_sample(int64_t t, int n_samples) {
   return std::max(0, std::min((int) n_samples - 1, (int) ((t * WHISPER_SAMPLE_RATE) / 100)));

@@ -8,6 +8,10 @@
 
 #include "../dr_libs/dr_wav.h"
 
+#define DR_MP3_IMPLEMENTATION
+
+#include "dr_libs/dr_mp3.h"
+#include <samplerate.h>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -15,8 +19,7 @@
 #include <locale>
 #include <codecvt>
 #include <sstream>
-#define DR_MP3_IMPLEMENTATION
-#include "dr_libs/dr_mp3.h"
+
 #if defined(_MSC_VER)
 #pragma warning(disable: 4244 4267) // possible loss of data
 #endif
@@ -631,6 +634,43 @@ gpt_vocab::id gpt_sample_top_k_top_p_repeat(
 
 }
 
+bool resample(const float *input, size_t inputSampleRate, size_t inputSize,
+              std::vector<float> &output, size_t outputSampleRate) {
+  // Initialize Converter
+  int error;
+  SRC_STATE *src_state = src_new(SRC_SINC_FASTEST, 1, &error);
+  if (src_state == NULL) {
+    fprintf(stderr,"error %s\n",src_strerror(error));
+    return false;
+  }
+
+  // set convert param
+  SRC_DATA src_data;
+  src_data.data_in = input;
+  src_data.input_frames = inputSize;
+  src_data.data_out = new float[inputSize]; // assign size
+  src_data.output_frames = inputSize;
+  src_data.src_ratio = double(outputSampleRate) / inputSampleRate;
+
+  // convert
+  error = src_process(src_state, &src_data);
+  if (error) {
+    fprintf(stderr,"Error converting sample rate: %d",error);
+    delete[] src_data.data_out;
+    src_delete(src_state);
+    return false;
+  }
+
+  // Copy the transformed data into the output vector
+  output.assign(src_data.data_out, src_data.data_out + src_data.output_frames_gen);
+
+  // clean
+  delete[] src_data.data_out;
+  src_delete(src_state);
+
+  return true;
+}
+
 bool
 read_wav(const std::string &fname, std::vector<float> &pcmf32, std::vector<std::vector<float>> &pcmf32s, bool stereo) {
   drwav wav;
@@ -721,11 +761,6 @@ bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo)
     return false;
   }
 
-  if (mp3.sampleRate != COMMON_SAMPLE_RATE) {
-    fprintf(stderr, "%s: MP3 file '%s' must be %i kHz\n", __func__, fname.c_str(), COMMON_SAMPLE_RATE / 1000);
-    return false;
-  }
-
   if (mp3.channels != 1 && mp3.channels != 2) {
     fprintf(stderr, "%s: MP3 file '%s' must be mono or stereo\n", __func__, fname.c_str());
     return false;
@@ -739,7 +774,19 @@ bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo)
   drmp3_uint64 frameCount;
   float *pSampleData = drmp3__full_read_and_close_f32(&mp3, nullptr, &frameCount);
 
-  pcmf32.assign(pSampleData, pSampleData + frameCount * mp3.channels);
+  if (mp3.sampleRate != COMMON_SAMPLE_RATE) {
+    std::vector<float> resampledData;
+    if (!resample(pSampleData, mp3.sampleRate, frameCount * mp3.channels, resampledData, COMMON_SAMPLE_RATE)) {
+      fprintf(stderr, "error: failed to resample MP3 data\n");
+      drmp3_free(pSampleData, nullptr);
+      return false;
+    }
+
+    pcmf32.swap(resampledData); // 使用转换后的数据
+
+  } else {
+    pcmf32.assign(pSampleData, pSampleData + frameCount * mp3.channels);
+  }
   drmp3_free(pSampleData, nullptr);
 
   return true;
@@ -827,6 +874,7 @@ read_m4a(const std::string &fname, std::vector<float> &pcmf32, std::vector<std::
 
   return true;
 }
+
 void high_pass_filter(std::vector<float> &data, float cutoff, float sample_rate) {
   const float rc = 1.0f / (2.0f * M_PI * cutoff);
   const float dt = 1.0f / sample_rate;

@@ -11,6 +11,11 @@
     {
       "name": "uwebsockets",
       "version>=": "20.47.0"
+    },
+    {
+      "name": "libsamplerate",
+      "version>=": "0.2.2#1",
+      "$comment": "  # this is heuristically generated, and may not be correct\n\n  find_package(SampleRate CONFIG REQUIRED)\n\n  target_link_libraries(main PRIVATE SampleRate::samplerate)\n"
     }
   ]
 }

@@ -10,7 +10,8 @@
 #include <sstream>
 
 using namespace stream_components;
-bool processAudio(WhisperService service, std::vector<float> pcm32, const whisper_local_stream_params& params);
+
+bool processAudio(WhisperService service, std::vector<float> pcm32, const whisper_local_stream_params &params);
 
 int main(int argc, char **argv) {
   // Read parameters...
@@ -58,8 +59,8 @@ int main(int argc, char **argv) {
     ws->send(message, opCode);
   };
   //Save Audio
-  auto ws_save_handler=[](auto *ws,std::string_view message,uWS::OpCode opCode){
-    auto* userData = (std::string*)ws->getUserData();
+  auto ws_save_handler = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
+    auto *userData = (std::string *) ws->getUserData();
     // printf("%s: User Data: %s\n", get_current_time().c_str(), userData->c_str());
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
         ws->send(response.dump(), uWS::OpCode::TEXT);
       }
 
-    }else if (opCode == uWS::OpCode::BINARY) {
+    } else if (opCode == uWS::OpCode::BINARY) {
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
@@ -148,10 +149,10 @@ int main(int argc, char **argv) {
             // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
             // TODO: 实现VAD处理，
             //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
-            isOk=whisperService.process(pcm32.data(), pcm32.size());
+            isOk = whisperService.process(pcm32.data(), pcm32.size());
           } else {
             // asr
-            isOk= whisperService.process(pcm32.data(), pcm32.size());
+            isOk = whisperService.process(pcm32.data(), pcm32.size());
           }
           if (isOk) {
             final_results = get_result(whisperService.ctx);
@@ -165,7 +166,7 @@ int main(int argc, char **argv) {
         auto size = message.size();
       }
     } else if (opCode == uWS::OpCode::BINARY) {
-      int size=message.size();
+      int size = message.size();
       // process binary message（PCM16 data）
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
       // printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
@@ -178,7 +179,7 @@ int main(int argc, char **argv) {
 
       audioBuffer.insert(audioBuffer.end(), pcm16.begin(), pcm16.end());
       unsigned long bufferSize = audioBuffer.size();
-      if(bufferSize>16000*10){
+      if (bufferSize > 16000 * 10) {
         std::vector<float> pcm32(bufferSize);
         std::transform(audioBuffer.begin(), audioBuffer.end(), pcm32.begin(), [](int16_t sample) {
           return static_cast<float>(sample) / 32768.0f;
@@ -190,13 +191,13 @@ int main(int argc, char **argv) {
           // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
           // TODO: 实现VAD处理，
           //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
-          isOk=whisperService.process(pcm32.data(), pcm32.size());
+          isOk = whisperService.process(pcm32.data(), pcm32.size());
         } else {
           // asr
-          isOk=whisperService.process(pcm32.data(), pcm32.size());
+          isOk = whisperService.process(pcm32.data(), pcm32.size());
         }
         if (isOk) {
-          final_results = getResult(whisperService.ctx);
+          final_results = get_result(whisperService.ctx);
           response["result"] = final_results;
         }
       }
@@ -211,19 +212,19 @@ int main(int argc, char **argv) {
     .get("/hello", hello_action)
       //echo
     .ws<std::string>("/echo", {.message = ws_echo_handler})
-    //only_save_audio
-    .ws<std::string>("/streaming/save", {.open=[](auto *ws){
+      //only_save_audio
+    .ws<std::string>("/streaming/save", {.open=[](auto *ws) {
       // 初始化用户数据
-      auto* userData = (std::string*)ws->getUserData();
+      auto *userData = (std::string *) ws->getUserData();
       *userData = "Create User Id";  // 设置初始值
-    },.message = ws_save_handler})
+    }, .message = ws_save_handler})
       //streaming asr
     .ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler})
       //listen
     .listen(port, started_handler).run();
 }
 
-bool processAudio(WhisperService whisperService, std::vector<float> pcm32, const whisper_local_stream_params& params) {
+bool processAudio(WhisperService whisperService, std::vector<float> pcm32, const whisper_local_stream_params &params) {
   if (params.audio.use_vad) {
     // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
     // TODO: 实现VAD处理，

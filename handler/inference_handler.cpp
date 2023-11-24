@@ -23,23 +23,6 @@ const std::vector<std::string> k_colors = {
 };
 
 
-//  500 -> 00:05.000
-// 6000 -> 01:00.000
-std::string to_timestamp(int64_t t, bool comma = false) {
-  int64_t msec = t * 10;
-  int64_t hr = msec / (1000 * 60 * 60);
-  msec = msec - hr * (1000 * 60 * 60);
-  int64_t min = msec / (1000 * 60);
-  msec = msec - min * (1000 * 60);
-  int64_t sec = msec / 1000;
-  msec = msec - sec * 1000;
-
-  char buf[32];
-  snprintf(buf, sizeof(buf), "%02d:%02d:%02d%s%03d", (int) hr, (int) min, (int) sec, comma ? "," : ".", (int) msec);
-
-  return std::string(buf);
-}
-
 int timestamp_to_sample(int64_t t, int n_samples) {
   return std::max(0, std::min((int) n_samples - 1, (int) ((t * WHISPER_SAMPLE_RATE) / 100)));
 }
@@ -202,20 +185,20 @@ void getReqParameters(const Request &req, whisper_params &params) {
   if (req.has_file("temerature")) {
     params.userdef_temp = std::stof(req.get_file_value("temperature").content);
   }
-  if(req.has_file("audio_format")){
-    params.audio_format=req.get_file_value("audio_format").content;
+  if (req.has_file("audio_format")) {
+    params.audio_format = req.get_file_value("audio_format").content;
   }
 }
 
 
 void getReqParameters(const Request &request, whisper_params &params);
 
-bool read_audio_file(std::string audio_format, std::string filename, std::vector<float> & pcmf32,
-                     std::vector<std::vector<float>> & pcmf32s, bool diarize) {
+bool read_audio_file(std::string audio_format, std::string filename, std::vector<float> &pcmf32,
+                     std::vector<std::vector<float>> &pcmf32s, bool diarize) {
 
   // read audio content into pcmf32
   if (audio_format == "mp3") {
-    if (!::read_mp3(filename, pcmf32,diarize)) {
+    if (!::read_mp3(filename, pcmf32, diarize)) {
       fprintf(stderr, "error: failed to read mp3 file '%s'\n", filename.c_str());
       return false;
     }
@@ -234,7 +217,7 @@ bool read_audio_file(std::string audio_format, std::string filename, std::vector
 }
 
 bool run(std::mutex &whisper_mutex, whisper_params &params, whisper_context *ctx, std::string filename,
-         const std::vector<std::vector<float>>& pcmf32s, std::vector<float> pcmf32) {
+         const std::vector<std::vector<float>> &pcmf32s, std::vector<float> pcmf32) {
   // print system information
   {
     fprintf(stderr, "\n");
@@ -363,19 +346,19 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
   if (!request.has_file("file")) {
     fprintf(stderr, "error: no 'file' field in the request\n");
     json jres = json{
-      {"code",-1},
-      {"msg", "no 'file' field in the request"}
+      {"code", -1},
+      {"msg",  "no 'file' field in the request"}
     };
-    auto json_string  = jres.dump(-1, ' ', false,json::error_handler_t::replace);
-    response.set_content(json_string,"application/json");
+    auto json_string = jres.dump(-1, ' ', false, json::error_handler_t::replace);
+    response.set_content(json_string, "application/json");
     return;
   }
   auto audio_file = request.get_file_value("file");
   std::string filename{audio_file.filename};
-  printf("%s: Received filename: %s \n",get_current_time().c_str(),filename.c_str());
+  printf("%s: Received filename: %s \n", get_current_time().c_str(), filename.c_str());
   // check non-required fields
   getReqParameters(request, params);
-  printf("%s: audio_format:%s \n",get_current_time().c_str(),params.audio_format.c_str());
+  printf("%s: audio_format:%s \n", get_current_time().c_str(), params.audio_format.c_str());
 
   // audio arrays
   std::vector<float> pcmf32;               // mono-channel F32 PCM
@@ -385,13 +368,13 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
   std::ofstream temp_file{filename, std::ios::binary};
   temp_file << audio_file.content;
 
-  bool isOK=read_audio_file(params.audio_format,filename,pcmf32,pcmf32s,params.diarize);
-  if(!isOK){
-    json json_obj={
-      {"code",-1},
-      {"msg","error: failed to read WAV file "}
+  bool isOK = read_audio_file(params.audio_format, filename, pcmf32, pcmf32s, params.diarize);
+  if (!isOK) {
+    json json_obj = {
+      {"code", -1},
+      {"msg",  "error: failed to read WAV file "}
     };
-    auto json_string  = json_obj.dump(-1, ' ', false,json::error_handler_t::replace);
+    auto json_string = json_obj.dump(-1, ' ', false, json::error_handler_t::replace);
     response.set_content(json_string, "application/json");
     return;
   }
@@ -401,8 +384,8 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
 
   printf("Successfully loaded %s\n", filename.c_str());
 
-  bool isOk= run(whisper_mutex, params, ctx, filename, pcmf32s, pcmf32);
-  if(isOk){
+  bool isOk = run(whisper_mutex, params, ctx, filename, pcmf32s, pcmf32);
+  if (isOk) {
     // return results to user
     if (params.response_format == text_format) {
       std::string results = output_str(ctx, params, pcmf32s);
@@ -412,18 +395,18 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     else {
       auto results = get_result(ctx);
       json jres = json{
-        {"code",0},
+        {"code", 0},
         {"data", results}
       };
       response.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
                            "application/json");
     }
-  }else{
+  } else {
     json jres = json{
-      {"code",-1},
-      {"msg", "run error"}
+      {"code", -1},
+      {"msg",  "run error"}
     };
-    auto json_string  = jres.dump(-1, ' ', false,json::error_handler_t::replace);
-    response.set_content(json_string,"application/json");
+    auto json_string = jres.dump(-1, ' ', false, json::error_handler_t::replace);
+    response.set_content(json_string, "application/json");
   }
 }

@@ -42,6 +42,7 @@ struct gpt_params {
   int32_t interactive_port = -1;
 };
 
+
 bool gpt_params_parse(int argc, char **argv, gpt_params &params);
 
 void gpt_print_usage(int argc, char **argv, const gpt_params &params);
@@ -134,7 +135,8 @@ gpt_vocab::id gpt_sample_top_k_top_p_repeat(
 //
 // Audio utils
 //
-
+bool resample(const float *input, size_t inputSampleRate, size_t inputSize,
+              std::vector<float> &output, size_t outputSampleRate);
 // Read WAV audio file and store the PCM data into pcmf32
 // The sample rate of the audio must be equal to COMMON_SAMPLE_RATE
 // If stereo flag is set and the audio has 2 channels, the pcmf32s will contain 2 channel PCM

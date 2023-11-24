@@ -19,6 +19,8 @@ message(STATUS "SDL2 libraries: ${SDL2_LIBRARIES}")
 
 include_directories(${SDL2_INCLUDE_DIRS})
 
+find_package(SampleRate CONFIG REQUIRED)
+
 # webrtc
 include_directories(webrtc)
 include_directories(.)
@@ -51,17 +53,17 @@ add_executable(sdl_version examples/sdl_version.cpp)
 target_link_libraries(sdl_version ${SDL2_LIBRARIES})
 
 add_executable(simplest examples/simplest.cpp common/common.cpp)
-target_link_libraries(simplest whisper)
+target_link_libraries(simplest whisper SampleRate::samplerate)
 
 add_executable(stream_local examples/stream_local.cpp common/common.cpp common/common-sdl.cpp
         stream/stream_components_service.cpp stream/stream_components_audio.cpp
         stream/stream_components_output.cpp
         )
-target_link_libraries(stream_local whisper ${SDL2_LIBRARIES})
+target_link_libraries(stream_local whisper ${SDL2_LIBRARIES} SampleRate::samplerate)
 
 add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp
         common/common.cpp common/utils.cpp handler/inference_handler.cpp params/whisper_params.cpp)
-target_link_libraries(whisper_http_server_base_httplib whisper)
+target_link_libraries(whisper_http_server_base_httplib whisper SampleRate::samplerate)
 
 add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp stream/stream_components_service.cpp common/utils.cpp)
 #add uwebsockets head files
@@ -70,14 +72,16 @@ target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${UWEBSOCK
 # Detecting Operating Systems
 if (WIN32)
     # if Windows
-    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB libuv::uv ${USOCKETS_LIBRARY})
+    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv)
 elseif (APPLE)
     # if MacOS
-    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB libuv::uv_a ${USOCKETS_LIBRARY})
+    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv_a)
 else ()
     # if others eg. Linux
-    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB libuv::uv ${USOCKETS_LIBRARY})
+    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv)
 endif ()
+
+target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB ${USOCKETS_LIBRARY} SampleRate::samplerate)
 
 
 
