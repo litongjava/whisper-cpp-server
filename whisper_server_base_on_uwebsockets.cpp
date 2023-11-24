@@ -10,7 +10,6 @@
 #include <sstream>
 
 using namespace stream_components;
-nlohmann::json getResult(whisper_context *ctx);
 bool processAudio(WhisperService service, std::vector<float> pcm32, const whisper_local_stream_params& params);
 
 int main(int argc, char **argv) {
@@ -155,7 +154,7 @@ int main(int argc, char **argv) {
             isOk= whisperService.process(pcm32.data(), pcm32.size());
           }
           if (isOk) {
-            final_results = getResult(whisperService.ctx);
+            final_results = get_result(whisperService.ctx);
             response["result"] = final_results;
           }
           ws->send(response.dump(), uWS::OpCode::TEXT);
@@ -236,22 +235,6 @@ bool processAudio(WhisperService whisperService, std::vector<float> pcm32, const
   }
 }
 
-nlohmann::json getResult(whisper_context *ctx) {
-  nlohmann::json results = nlohmann::json(nlohmann::json::array());
-  const int n_segments = whisper_full_n_segments(ctx);
-  for (int i = 0; i < n_segments; ++i) {
-    nlohmann::json segment;
-    int64_t t0 = whisper_full_get_segment_t0(ctx, i);
-    int64_t t1 = whisper_full_get_segment_t1(ctx, i);
-    const char *sentence = whisper_full_get_segment_text(ctx, i);
-    auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
-    printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
-    segment["t0"] = t0;
-    segment["t1"] = t1;
-    segment["sentence"] = sentence;
-    results.push_back(segment);
-  }
-  return results;
-}
+
 
 

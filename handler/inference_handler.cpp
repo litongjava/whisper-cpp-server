@@ -410,10 +410,10 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     }
       // TODO add more output formats
     else {
-      std::string results = output_str(ctx, params, pcmf32s);
+      auto results = get_result(ctx);
       json jres = json{
         {"code",0},
-        {"text", results}
+        {"data", results}
       };
       response.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
                            "application/json");
