@@ -15,7 +15,8 @@
 #include <locale>
 #include <codecvt>
 #include <sstream>
-
+#define DR_MP3_IMPLEMENTATION
+#include "dr_libs/dr_mp3.h"
 #if defined(_MSC_VER)
 #pragma warning(disable: 4244 4267) // possible loss of data
 #endif
@@ -713,9 +714,35 @@ read_wav(const std::string &fname, std::vector<float> &pcmf32, std::vector<std::
   return true;
 }
 
-bool
-read_mp3(const std::string &fname, std::vector<float> &pcmf32, std::vector<std::vector<float>> &pcmf32s, bool stereo) {
+bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo) {
+  drmp3 mp3;
+  if (!drmp3_init_file(&mp3, fname.c_str(), nullptr)) {
+    fprintf(stderr, "error: failed to open '%s' as MP3 file\n", fname.c_str());
+    return false;
+  }
 
+  if (mp3.sampleRate != COMMON_SAMPLE_RATE) {
+    fprintf(stderr, "%s: MP3 file '%s' must be %i kHz\n", __func__, fname.c_str(), COMMON_SAMPLE_RATE / 1000);
+    return false;
+  }
+
+  if (mp3.channels != 1 && mp3.channels != 2) {
+    fprintf(stderr, "%s: MP3 file '%s' must be mono or stereo\n", __func__, fname.c_str());
+    return false;
+  }
+
+  if (stereo && mp3.channels != 2) {
+    fprintf(stderr, "%s: MP3 file '%s' must be stereo for this operation\n", __func__, fname.c_str());
+    return false;
+  }
+
+  drmp3_uint64 frameCount;
+  float *pSampleData = drmp3__full_read_and_close_f32(&mp3, nullptr, &frameCount);
+
+  pcmf32.assign(pSampleData, pSampleData + frameCount * mp3.channels);
+  drmp3_free(pSampleData, nullptr);
+
+  return true;
 }
 
 bool

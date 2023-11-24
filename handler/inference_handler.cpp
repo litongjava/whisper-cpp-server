@@ -203,7 +203,7 @@ void getReqParameters(const Request &req, whisper_params &params) {
     params.userdef_temp = std::stof(req.get_file_value("temperature").content);
   }
   if(req.has_file("audio_format")){
-    params.audio_format=std::stof(req.get_file_value("audio_format").content);
+    params.audio_format=req.get_file_value("audio_format").content;
   }
 }
 
@@ -215,7 +215,7 @@ bool read_audio_file(std::string audio_format, std::string filename, std::vector
 
   // read audio content into pcmf32
   if (audio_format == "mp3") {
-    if (!::read_mp3(filename, pcmf32, pcmf32s, diarize)) {
+    if (!::read_mp3(filename, pcmf32,diarize)) {
       fprintf(stderr, "error: failed to read mp3 file '%s'\n", filename.c_str());
       return false;
     }
@@ -371,12 +371,11 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     return;
   }
   auto audio_file = request.get_file_value("file");
-
+  std::string filename{audio_file.filename};
+  printf("%s: Received filename: %s \n",get_current_time().c_str(),filename.c_str());
   // check non-required fields
   getReqParameters(request, params);
-
-  std::string filename{audio_file.filename};
-  printf("%s: Received filename: %s,audio_format:%s \n",get_current_time().c_str(),filename.c_str(),params.audio_format.c_str());
+  printf("%s: audio_format:%s \n",get_current_time().c_str(),params.audio_format.c_str());
 
   // audio arrays
   std::vector<float> pcmf32;               // mono-channel F32 PCM
