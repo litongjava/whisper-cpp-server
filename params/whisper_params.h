@@ -58,6 +58,7 @@ struct whisper_params {
   std::string tdrz_speaker_turn = " [SPEAKER_TURN]"; // TODO: set from command line
 
   std::string openvino_encode_device = "CPU";
+  std::string audio_format="wav";
 };
 
 struct server_params {

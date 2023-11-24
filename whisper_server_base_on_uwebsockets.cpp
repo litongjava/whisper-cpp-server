@@ -1,7 +1,7 @@
 #include "nlohmann/json.hpp"
 #include "stream/stream_components_service.h"
 #include "stream/stream_components.h"
-#include "utils/utils.h"
+#include "common/utils.h"
 #include "common/common.h"
 #include <uwebsockets/App.h>
 #include <iostream>
@@ -61,14 +61,13 @@ int main(int argc, char **argv) {
   //Save Audio
   auto ws_save_handler=[](auto *ws,std::string_view message,uWS::OpCode opCode){
     auto* userData = (std::string*)ws->getUserData();
-    printf("%s: User Data: %s\n", get_current_time().c_str(), userData->c_str());
+    // printf("%s: User Data: %s\n", get_current_time().c_str(), userData->c_str());
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
 
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-      printf("%s: Received message on /streaming/save: %s\n", get_current_time().c_str(),
-             std::string(message).c_str());
+      // printf("%s: Received message on /streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
       auto jsonMsg = nlohmann::json::parse(message);
       std::string signal = jsonMsg["signal"];
       if (signal == "start") {
@@ -94,12 +93,13 @@ int main(int argc, char **argv) {
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      printf("%s: Received message size on /streaming/save: %zu\n", get_current_time().c_str(), size);
+      // printf("%s: Received message size on /streaming/save: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), data, size);
       //write to file
       wavWriter.write(pcm16.data(), size / 2);
+      ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
 
@@ -111,11 +111,10 @@ int main(int argc, char **argv) {
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
     thread_local nlohmann::json final_results;
     auto thread_id = std::this_thread::get_id();
-    std::cout << get_current_time().c_str() << ": Handling a message in thread: " << thread_id << std::endl;
+    // std::cout << get_current_time().c_str() << ": Handling a message in thread: " << thread_id << std::endl;
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
-             std::string(message).c_str());
+      // printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),std::string(message).c_str());
       // process text message
       try {
         auto jsonMsg = nlohmann::json::parse(message);
@@ -147,7 +146,7 @@ int main(int argc, char **argv) {
           // 如果开启了VAD
           bool isOk;
           if (params.audio.use_vad) {
-            printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
+            // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
             // TODO: 实现VAD处理，
             //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
             isOk=whisperService.process(pcm32.data(), pcm32.size());
@@ -167,9 +166,10 @@ int main(int argc, char **argv) {
         auto size = message.size();
       }
     } else if (opCode == uWS::OpCode::BINARY) {
+      int size=message.size();
       // process binary message（PCM16 data）
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
+      // printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
 
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
         // 如果开启了VAD
         bool isOk;
         if (params.audio.use_vad) {
-          printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
+          // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
           // TODO: 实现VAD处理，
           //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
           isOk=whisperService.process(pcm32.data(), pcm32.size());
@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 
 bool processAudio(WhisperService whisperService, std::vector<float> pcm32, const whisper_local_stream_params& params) {
   if (params.audio.use_vad) {
-    printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
+    // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
     // TODO: 实现VAD处理，
     //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
     return whisperService.process(pcm32.data(), pcm32.size());

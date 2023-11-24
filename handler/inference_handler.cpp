@@ -3,6 +3,7 @@
 #include "../common/common.h"
 #include "../params/whisper_params.h"
 #include "../nlohmann/json.hpp"
+#include "common/utils.h"
 
 using json = nlohmann::json;
 
@@ -201,6 +202,9 @@ void getReqParameters(const Request &req, whisper_params &params) {
   if (req.has_file("temerature")) {
     params.userdef_temp = std::stof(req.get_file_value("temperature").content);
   }
+  if(req.has_file("audio_format")){
+    params.audio_format=std::stof(req.get_file_value("audio_format").content);
+  }
 }
 
 
@@ -225,7 +229,7 @@ void handleInference(const Request &req, Response &res, std::mutex &whisper_mute
   getReqParameters(req, params);
 
   std::string filename{audio_file.filename};
-  printf("Received request: %s\n", filename.c_str());
+  printf("%s: Received filename: %s,audio_format\n",get_current_time().c_str(),filename.c_str(),params.audio_format.c_str());
 
   // audio arrays
   std::vector<float> pcmf32;               // mono-channel F32 PCM
@@ -236,13 +240,20 @@ void handleInference(const Request &req, Response &res, std::mutex &whisper_mute
   temp_file << audio_file.content;
 
   // read wav content into pcmf32
-  if (!::read_wav(filename, pcmf32, pcmf32s, params.diarize)) {
-    fprintf(stderr, "error: failed to read WAV file '%s'\n", filename.c_str());
-    const std::string error_resp = "{\"error\":\"failed to read WAV file\"}";
-    res.set_content(error_resp, "application/json");
-    whisper_mutex.unlock();
-    return;
+  if(params.audio_format=="mp3"){
+
+  }else if(params.audio_format=="m4a"){
+
+  }else{
+    if (!::read_wav(filename, pcmf32, pcmf32s, params.diarize)) {
+      fprintf(stderr, "error: failed to read WAV file '%s'\n", filename.c_str());
+      const std::string error_resp = "{\"error\":\"failed to read WAV file\"}";
+      res.set_content(error_resp, "application/json");
+      whisper_mutex.unlock();
+      return;
+    }
   }
+
   // remove temp file
   std::remove(filename.c_str());
 
