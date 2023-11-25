@@ -85,7 +85,8 @@ else ()
     target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv)
 endif ()
 
-target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB ${USOCKETS_LIBRARY} SampleRate::samplerate)
-
-
+target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB ${USOCKETS_LIBRARY}
+        SampleRate::samplerate ${SPEEXDSP_LIBRARY})
+# 链接头文件
+target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${SPEEXDSP_INCLUDE_DIRS})
 

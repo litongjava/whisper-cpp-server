@@ -4,7 +4,7 @@
 #include "../params/whisper_params.h"
 #include "../nlohmann/json.hpp"
 #include "../common/utils.h"
-#include "common/common-m4a.h"
+#include "../common/common-m4a.h"
 
 using json = nlohmann::json;
 

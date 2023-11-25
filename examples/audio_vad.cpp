@@ -32,7 +32,6 @@ int main() {
   std::vector<float> audio_buffer;
   int chunk_size = 160; // 适用于 16 kHz 采样率的 100 毫秒帧
   SpeexPreprocessState *st = speex_preprocess_state_init(chunk_size, WHISPER_SAMPLE_RATE);
-
   int vad = 1;
   speex_preprocess_ctl(st, SPEEX_PREPROCESS_SET_VAD, &vad);
 

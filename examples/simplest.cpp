@@ -1,7 +1,7 @@
 #include "../common/common.h"
 
 #include "whisper.h"
-#include "common/utils.h"
+#include "../common/utils.h"
 
 #include <cmath>
 #include <cstdio>
