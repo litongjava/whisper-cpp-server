@@ -1,25 +1,8 @@
 #include "stream_components_output.h"
-
+#include "../common/utils.h"
 using namespace stream_components;
 
-// -- utility methods --
 
-//  500 -> 00:05.000
-// 6000 -> 01:00.000
-std::string to_timestamp(int64_t t, bool comma = false) {
-  int64_t msec = t * 10;
-  int64_t hr = msec / (1000 * 60 * 60);
-  msec = msec - hr * (1000 * 60 * 60);
-  int64_t min = msec / (1000 * 60);
-  msec = msec - min * (1000 * 60);
-  int64_t sec = msec / 1000;
-  msec = msec - sec * 1000;
-
-  char buf[32];
-  snprintf(buf, sizeof(buf), "%02d:%02d:%02d%s%03d", (int) hr, (int) min, (int) sec, comma ? "," : ".", (int) msec);
-
-  return std::string(buf);
-}
 
 char *escape_double_quotes_and_backslashes(const char *str) {
   if (str == NULL) {

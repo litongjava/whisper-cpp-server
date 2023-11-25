@@ -52,10 +52,10 @@ endif ()
 add_executable(sdl_version examples/sdl_version.cpp)
 target_link_libraries(sdl_version ${SDL2_LIBRARIES})
 
-add_executable(simplest examples/simplest.cpp common/common.cpp)
+add_executable(simplest examples/simplest.cpp common/common.cpp common/utils.cpp)
 target_link_libraries(simplest whisper SampleRate::samplerate)
 
-add_executable(stream_local examples/stream_local.cpp common/common.cpp common/common-sdl.cpp
+add_executable(stream_local examples/stream_local.cpp common/common.cpp common/common-sdl.cpp common/utils.cpp
         stream/stream_components_service.cpp stream/stream_components_audio.cpp
         stream/stream_components_output.cpp
         )

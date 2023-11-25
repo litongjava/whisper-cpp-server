@@ -153,3 +153,5 @@ venv/
 Debug/
 *.bin
 *.wav
+cmake-build-release/
+whisper-cpp-server.zip
