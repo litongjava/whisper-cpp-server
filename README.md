@@ -11,93 +11,14 @@ options:
 -m FNAME,  --model FNAME       [models/ggml-base.en.bin] model path                                                                                                                                   
 -di,       --diarize           [false  ] stereo audio diarization
 ```
-## service
+## whisper_http_server_base_httplib
 
-Simple http service. WAV Files are passed to the inference model via http requests.
+Simple http service. WAV mp4 and m4a Files are passed to the inference model via http requests.
 
 ```
-./cmake-build-debug/service -m models/ggml-base.en.bin
-```
+./whisper_http_server_base_httplib -h
 
-```shell
-whisper_init_from_file_with_params_no_state: loading model from 'models/ggml-base.en.bin'
-whisper_model_load: loading model
-whisper_model_load: n_vocab       = 51864
-whisper_model_load: n_audio_ctx   = 1500
-whisper_model_load: n_audio_state = 512
-whisper_model_load: n_audio_head  = 8
-whisper_model_load: n_audio_layer = 6
-whisper_model_load: n_text_ctx    = 448
-whisper_model_load: n_text_state  = 512
-whisper_model_load: n_text_head   = 8
-whisper_model_load: n_text_layer  = 6
-whisper_model_load: n_mels        = 80
-whisper_model_load: ftype         = 1
-whisper_model_load: qntvr         = 0
-whisper_model_load: type          = 2 (base)
-whisper_model_load: adding 1607 extra tokens
-whisper_model_load: n_langs       = 99
-whisper_backend_init: using Metal backend
-ggml_metal_init: allocating
-ggml_metal_init: found device: Apple M2
-ggml_metal_init: picking default device: Apple M2
-ggml_metal_init: default.metallib not found, loading from source
-ggml_metal_init: error: could not use bundle path to find ggml-metal.metal, falling back to trying cwd
-ggml_metal_init: loading 'ggml-metal.metal'
-ggml_metal_init: GPU name:   Apple M2
-ggml_metal_init: GPU family: MTLGPUFamilyApple8 (1008)
-ggml_metal_init: hasUnifiedMemory              = true
-ggml_metal_init: recommendedMaxWorkingSetSize  = 11453.25 MB
-ggml_metal_init: maxTransferRate               = built-in GPU
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =   156.68 MB, (  157.20 / 11453.25)
-whisper_model_load:    Metal buffer size =   156.67 MB
-whisper_model_load: model size    =  156.58 MB
-whisper_backend_init: using Metal backend
-ggml_metal_init: allocating
-ggml_metal_init: found device: Apple M2
-ggml_metal_init: picking default device: Apple M2
-ggml_metal_init: default.metallib not found, loading from source
-ggml_metal_init: error: could not use bundle path to find ggml-metal.metal, falling back to trying cwd
-ggml_metal_init: loading 'ggml-metal.metal'
-ggml_metal_init: GPU name:   Apple M2
-ggml_metal_init: GPU family: MTLGPUFamilyApple8 (1008)
-ggml_metal_init: hasUnifiedMemory              = true
-ggml_metal_init: recommendedMaxWorkingSetSize  = 11453.25 MB
-ggml_metal_init: maxTransferRate               = built-in GPU
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =    16.52 MB, (  173.72 / 11453.25)
-whisper_init_state: kv self size  =   16.52 MB
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =    18.43 MB, (  192.15 / 11453.25)
-whisper_init_state: kv cross size =   18.43 MB
-whisper_init_state: loading Core ML model from 'models/ggml-base.en-encoder.mlmodelc'
-whisper_init_state: first run on a device may take a while ...
-whisper_init_state: Core ML model loaded
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     0.02 MB, (  196.51 / 11453.25)
-whisper_init_state: compute buffer (conv)   =    5.67 MB
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     0.02 MB, (  196.53 / 11453.25)
-whisper_init_state: compute buffer (cross)  =    4.71 MB
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     0.02 MB, (  196.54 / 11453.25)
-whisper_init_state: compute buffer (decode) =   96.41 MB
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     4.05 MB, (  200.59 / 11453.25)
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =     3.08 MB, (  203.67 / 11453.25)
-ggml_metal_add_buffer: allocated 'backend         ' buffer, size =    94.78 MB, (  298.45 / 11453.25)
-
-whisper service listening at http://0.0.0.0:8080
-
-Received request: jfk.wav
-Successfully loaded jfk.wav
-
-system_info: n_threads = 4 / 8 | AVX = 0 | AVX2 = 0 | AVX512 = 0 | FMA = 0 | NEON = 1 | ARM_FMA = 1 | METAL = 1 | F16C = 0 | FP16_VA = 1 | WASM_SIMD = 0 | BLAS = 1 | SSE3 = 0 | SSSE3 = 0 | VSX = 0 | CUDA = 0 | COREML = 1 | OPENVINO = 0 | 
-
-handleInference: processing 'jfk.wav' (176000 samples, 11.0 sec), 4 threads, 1 processors, lang = en, task = transcribe, timestamps = 1 ...
-
-Running whisper.cpp inference on jfk.wav
-
-[00:00:00.000 --> 00:00:11.000]   And so my fellow Americans, ask not what your country can do for you, ask what you can do for your country.
-```
-```
-./service -h
-
-usage: ./bin/service [options]
+usage: ./bin/whisper_http_server_base_httplib [options]
 
 options:
   -h,        --help              [default] show this help message and exit
@@ -131,7 +52,12 @@ options:
   --host HOST,                   [127.0.0.1] Hostname/ip-adress for the service
   --port PORT,                   [8080   ] Port number for the service
 ```
-
+## start whisper_http_server_base_httplib
+```
+./cmake-build-debug/whisper_http_server_base_httplib -m models/ggml-base.en.bin
+```
+Test server  
+see request doc in [doc](doc)
 ## request examples
 
 **/inference**
@@ -140,6 +66,7 @@ curl --location --request POST http://127.0.0.1:8080/inference \
 --form file=@"./samples/jfk.wav" \
 --form temperature="0.2" \
 --form response-format="json"
+--form audio_format="wav"
 ```
 
 **/load**
@@ -148,3 +75,12 @@ curl 127.0.0.1:8080/load \
 -H "Content-Type: multipart/form-data" \
 -F model="<path-to-model-file>"
 ```
+
+## whisper_server_base_on_uwebsockets
+web socket server  
+start server
+```
+./cmake-build-debug/whisper_server_base_on_uwebsockets -m models/ggml-base.en.bin
+```
+Test server
+see python [client](client)
