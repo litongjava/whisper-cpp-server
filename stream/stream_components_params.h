@@ -31,7 +31,7 @@ namespace stream_components {
       n_samples_keep = int32_t(1e-3 * keep_ms * WHISPER_SAMPLE_RATE);
       n_samples_len = int32_t(1e-3 * length_ms * WHISPER_SAMPLE_RATE);
       n_samples_30s = int32_t(1e-3 * 30000.0 * WHISPER_SAMPLE_RATE);
-      //use_vad = n_samples_step <= 0;
+//      use_vad = n_samples_step <= 0;
     }
   };
 

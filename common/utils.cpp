@@ -54,7 +54,7 @@ nlohmann::json get_result(whisper_context *ctx) {
     int64_t t1 = whisper_full_get_segment_t1(ctx, i);
     const char *sentence = whisper_full_get_segment_text(ctx, i);
     auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
-    //printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
+//    printf("%s: result:%s\n", get_current_time().c_str(), result.c_str());
     segment["t0"] = to_timestamp(t0);
     segment["t1"] = to_timestamp(t1);
     segment["sentence"] = sentence;

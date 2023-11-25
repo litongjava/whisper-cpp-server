@@ -115,8 +115,9 @@ int main(int argc, char **argv) {
     // std::cout << get_current_time().c_str() << ": Handling a message in thread: " << thread_id << std::endl;
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-      // printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),std::string(message).c_str());
       // process text message
+      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),std::string(message).c_str());
+
       try {
         auto jsonMsg = nlohmann::json::parse(message);
         std::string signal = jsonMsg["signal"];
@@ -134,12 +135,13 @@ int main(int argc, char **argv) {
           wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
         }
         if (signal == "end") {
+          printf("%s end\n");
           wavWriter.close();
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           response = {{"name",   filename},
                       {"signal", signal}};
+           printf("%s:buffer size:%d\n",get_current_time().c_str(),audioBuffer.size());
           bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-          audioBuffer.clear();
           if (isOk) {
             final_results = get_result(whisperService.ctx);
             response["result"] = final_results;
@@ -163,18 +165,22 @@ int main(int argc, char **argv) {
       //write to file
       wavWriter.write(pcm16.data(), size / 2);
       //convert flost
-      for (int16_t sample: pcm16) {
-        float floatSample = static_cast<float>(sample);
-        audioBuffer.push_back(floatSample);
-      }
+      std::vector<float> temp(size / 2);
+      std::transform(pcm16.begin(), pcm16.end(), temp.begin(), [](int16_t sample) {
+        return static_cast<float>(sample) / 32768.0f;
+      });
+      //insert to audio_buffer
+      audioBuffer.insert(audioBuffer.end(), temp.begin(), temp.end());
+
+       printf("%s:buffer size:%d\n",get_current_time().c_str(),audioBuffer.size());
       // 如果开启了VAD
       bool isOk;
-      printf("%s: use_vad: %d\n", get_current_time().c_str(), params.audio.use_vad);
+      // printf("%s: use_vad: %d\n", get_current_time().c_str(), params.audio.use_vad);
       if (params.audio.use_vad) {
 
         bool is_active = ::vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold,
                                       params.audio.freq_thold, false);
-        printf("%s: is_active: %d,is_last_active \n", get_current_time().c_str(), is_active, is_last_active);
+        printf("%s: is_active: %d,is_last_active %d\n", get_current_time().c_str(), is_active, is_last_active);
         if (!is_active && is_last_active) {
           is_last_active = false;
           isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
@@ -185,7 +191,7 @@ int main(int argc, char **argv) {
       } else {
         // asr
         isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-        audioBuffer.clear();
+//        audioBuffer.clear();
       }
       printf("%s: is_ok: %d \n", get_current_time().c_str(), isOk);
       if (isOk) {
