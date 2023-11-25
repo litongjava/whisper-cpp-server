@@ -20,7 +20,7 @@ message(STATUS "SDL2 libraries: ${SDL2_LIBRARIES}")
 include_directories(${SDL2_INCLUDE_DIRS})
 
 find_package(SampleRate CONFIG REQUIRED)
-
+find_package(FFMPEG REQUIRED)
 # webrtc
 include_directories(webrtc)
 include_directories(.)
@@ -62,10 +62,15 @@ add_executable(stream_local examples/stream_local.cpp common/common.cpp common/c
 target_link_libraries(stream_local whisper ${SDL2_LIBRARIES} SampleRate::samplerate)
 
 add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp
-        common/common.cpp common/utils.cpp handler/inference_handler.cpp params/whisper_params.cpp)
-target_link_libraries(whisper_http_server_base_httplib whisper SampleRate::samplerate)
+        common/common.cpp common/utils.cpp handler/inference_handler.cpp params/whisper_params.cpp
+        common/common-m4a.cpp)
+target_include_directories(whisper_http_server_base_httplib PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(whisper_http_server_base_httplib PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(whisper_http_server_base_httplib PRIVATE whisper SampleRate::samplerate ${FFMPEG_LIBRARIES})
 
-add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp stream/stream_components_service.cpp common/utils.cpp)
+
+add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp
+        stream/stream_components_service.cpp common/utils.cpp)
 #add uwebsockets head files
 target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${UWEBSOCKETS_INCLUDE_DIRS})
 # linked uWebSockets、zlib、libuv 和 uSockets libs

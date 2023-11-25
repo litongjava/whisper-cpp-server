@@ -146,8 +146,6 @@ bool read_wav(
   std::vector<std::vector<float>> &pcmf32s,
   bool stereo);
 bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo);
-bool
-read_m4a(const std::string &fname, std::vector<float> &pcmf32, std::vector<std::vector<float>> &pcmf32s, bool stereo);
 // Write PCM data into WAV audio file
 class wav_writer {
 private:

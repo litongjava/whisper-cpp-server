@@ -4,6 +4,7 @@
 #include "../params/whisper_params.h"
 #include "../nlohmann/json.hpp"
 #include "../common/utils.h"
+#include "common/common-m4a.h"
 
 using json = nlohmann::json;
 
@@ -203,7 +204,7 @@ bool read_audio_file(std::string audio_format, std::string filename, std::vector
       return false;
     }
   } else if (audio_format == "m4a") {
-    if (!::read_m4a(filename, pcmf32, pcmf32s, diarize)) {
+    if (!read_m4a(filename, pcmf32, pcmf32s, diarize)) {
       fprintf(stderr, "error: failed to read m4a file '%s'\n", filename.c_str());
       return false;
     }
@@ -372,7 +373,7 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
   if (!isOK) {
     json json_obj = {
       {"code", -1},
-      {"msg",  "error: failed to read WAV file "}
+      {"msg",  "error: failed to read audio file "}
     };
     auto json_string = json_obj.dump(-1, ' ', false, json::error_handler_t::replace);
     response.set_content(json_string, "application/json");
