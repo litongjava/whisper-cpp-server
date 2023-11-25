@@ -21,16 +21,10 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 find_package(SampleRate CONFIG REQUIRED)
 find_package(FFMPEG REQUIRED)
-# webrtc
-include_directories(webrtc)
-include_directories(.)
-# find cpp files
-file(GLOB VAD_FILES simplevad/*.c simplevad/*.h
-        webrtc/common_audio/*/*.c webrtc/rtc_base/*.c*)
-
-add_executable(audio_vad examples/audio_vad.cpp ${VAD_FILES})
-target_link_libraries(audio_vad pthread)
-
+# 查找 SpeexDSP 库
+find_library(SPEEXDSP_LIBRARY NAMES speexdsp)
+# 查找头文件
+find_path(SPEEXDSP_INCLUDE_DIRS "speex/speex_preprocess.h")
 
 # Detecting Operating Systems
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -48,12 +42,17 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     link_directories(E:\\code\\cpp\\project-ping\\whisper.cpp\\cmake-build-release\\bin)
 endif ()
 
+add_executable(audio_vad examples/audio_vad.cpp common/common.cpp
+        stream/stream_components_service.cpp common/utils.cpp)
+target_link_libraries(audio_vad PRIVATE whisper SampleRate::samplerate ${SPEEXDSP_LIBRARY})
+# 链接头文件
+target_include_directories(audio_vad PRIVATE ${SPEEXDSP_INCLUDE_DIRS})
 
 add_executable(sdl_version examples/sdl_version.cpp)
-target_link_libraries(sdl_version ${SDL2_LIBRARIES})
+target_link_libraries(sdl_version PRIVATE ${SDL2_LIBRARIES})
 
 add_executable(simplest examples/simplest.cpp common/common.cpp common/utils.cpp)
-target_link_libraries(simplest whisper SampleRate::samplerate)
+target_link_libraries(simplest PRIVATE whisper SampleRate::samplerate)
 
 add_executable(stream_local examples/stream_local.cpp common/common.cpp common/common-sdl.cpp common/utils.cpp
         stream/stream_components_service.cpp stream/stream_components_audio.cpp

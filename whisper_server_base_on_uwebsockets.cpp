@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
       } else {
         // asr
         isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-//        audioBuffer.clear();
+        audioBuffer.clear();
       }
       printf("%s: is_ok: %d \n", get_current_time().c_str(), isOk);
       if (isOk) {
