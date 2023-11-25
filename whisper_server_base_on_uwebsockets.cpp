@@ -105,9 +105,10 @@ int main(int argc, char **argv) {
 
   // WebSocket /paddlespeech/asr/streaming handler
   auto ws_streaming_handler = [&whisperService, &params](auto *ws, std::string_view message, uWS::OpCode opCode) {
-    thread_local std::vector<int16_t> audioBuffer; //thread-localized variable
+    thread_local std::vector<float> audioBuffer; //thread-localized variable
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
+    thread_local bool is_last_active = false;
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
     thread_local nlohmann::json final_results;
     auto thread_id = std::this_thread::get_id();
@@ -137,23 +138,8 @@ int main(int argc, char **argv) {
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           response = {{"name",   filename},
                       {"signal", signal}};
-
-          std::vector<float> pcm32(audioBuffer.size());
-          std::transform(audioBuffer.begin(), audioBuffer.end(), pcm32.begin(), [](int16_t sample) {
-            return static_cast<float>(sample) / 32768.0f;
-          });
+          bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
           audioBuffer.clear();
-          // 如果开启了VAD
-          bool isOk;
-          if (params.audio.use_vad) {
-            // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
-            // TODO: 实现VAD处理，
-            //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
-            isOk = whisperService.process(pcm32.data(), pcm32.size());
-          } else {
-            // asr
-            isOk = whisperService.process(pcm32.data(), pcm32.size());
-          }
           if (isOk) {
             final_results = get_result(whisperService.ctx);
             response["result"] = final_results;
@@ -169,37 +155,42 @@ int main(int argc, char **argv) {
       int size = message.size();
       // process binary message（PCM16 data）
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      // printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
+      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
 
       std::memcpy(pcm16.data(), data, size);
       //write to file
       wavWriter.write(pcm16.data(), size / 2);
+      //convert flost
+      for (int16_t sample: pcm16) {
+        float floatSample = static_cast<float>(sample);
+        audioBuffer.push_back(floatSample);
+      }
+      // 如果开启了VAD
+      bool isOk;
+      printf("%s: use_vad: %d\n", get_current_time().c_str(), params.audio.use_vad);
+      if (params.audio.use_vad) {
 
-      audioBuffer.insert(audioBuffer.end(), pcm16.begin(), pcm16.end());
-      unsigned long bufferSize = audioBuffer.size();
-      if (bufferSize > 16000 * 10) {
-        std::vector<float> pcm32(bufferSize);
-        std::transform(audioBuffer.begin(), audioBuffer.end(), pcm32.begin(), [](int16_t sample) {
-          return static_cast<float>(sample) / 32768.0f;
-        });
-        audioBuffer.clear();
-        // 如果开启了VAD
-        bool isOk;
-        if (params.audio.use_vad) {
-          // printf("%s: vad: %d \n", get_current_time().c_str(), params.audio.use_vad);
-          // TODO: 实现VAD处理，
-          //bool containsVoice = vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold, params.audio.freq_thold, false);
-          isOk = whisperService.process(pcm32.data(), pcm32.size());
+        bool is_active = ::vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.audio.vad_thold,
+                                      params.audio.freq_thold, false);
+        printf("%s: is_active: %d,is_last_active \n", get_current_time().c_str(), is_active, is_last_active);
+        if (!is_active && is_last_active) {
+          is_last_active = false;
+          isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
+          audioBuffer.clear();
         } else {
-          // asr
-          isOk = whisperService.process(pcm32.data(), pcm32.size());
+          is_last_active = is_active;
         }
-        if (isOk) {
-          final_results = get_result(whisperService.ctx);
-          response["result"] = final_results;
-        }
+      } else {
+        // asr
+        isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
+        audioBuffer.clear();
+      }
+      printf("%s: is_ok: %d \n", get_current_time().c_str(), isOk);
+      if (isOk) {
+        final_results = get_result(whisperService.ctx);
+        response["result"] = final_results;
       }
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
