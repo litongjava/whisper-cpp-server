@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-       printf("%s: Received TEXT message on /streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
+       printf("%s: Received TEXT message on /paddlespeech/streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
       auto jsonMsg = nlohmann::json::parse(message);
       std::string signal = jsonMsg["signal"];
       if (signal == "start") {
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
       //echo
     .ws<std::string>("/echo", {.message = ws_echo_handler})
       //only_save_audio
-    .ws<std::string>("/paddlespeech/asr/save", {.open=[](auto *ws) {
+    .ws<std::string>("/paddlespeech/streaming/save", {.open=[](auto *ws) {
       // 初始化用户数据
       auto *userData = (std::string *) ws->getUserData();
       *userData = "Create User Id";  // 设置初始值
