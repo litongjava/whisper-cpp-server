@@ -765,30 +765,50 @@ bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo)
     fprintf(stderr, "%s: MP3 file '%s' must be mono or stereo\n", __func__, fname.c_str());
     return false;
   }
-
   if (stereo && mp3.channels != 2) {
     fprintf(stderr, "%s: MP3 file '%s' must be stereo for this operation\n", __func__, fname.c_str());
     return false;
   }
 
+
   drmp3_uint64 frameCount;
   float *pSampleData = drmp3__full_read_and_close_f32(&mp3, nullptr, &frameCount);
+  bool isAllocated = false;
+  fprintf(stdout, "mp3.channels %d,mp3.sampleRate %d, frameCount:%d\n", mp3.channels, mp3.sampleRate, frameCount);
 
+  if (!stereo && mp3.channels == 2) {
+    std::vector<float> monoData;
+    monoData.reserve(frameCount);
+    for (drmp3_uint64 i = 0; i < frameCount * 2; i += 2) {
+      monoData.push_back((pSampleData[i] + pSampleData[i + 1]) / 2);
+    }
+    drmp3_free(pSampleData, nullptr); // Releasing raw data
+
+    pSampleData = new float[monoData.size()]; // reallocate memory
+    std::copy(monoData.begin(), monoData.end(), pSampleData); // copy data
+    isAllocated = true;
+    frameCount = monoData.size();
+    mp3.channels = 1;  // Update the number of channels
+  }
+
+  printf("mp3.channels %d,mp3.sampleRate %d, frameCount:%d\n", mp3.channels, mp3.sampleRate, frameCount);
   if (mp3.sampleRate != COMMON_SAMPLE_RATE) {
     std::vector<float> resampledData;
-    if (!resample(pSampleData, mp3.sampleRate, frameCount * mp3.channels, resampledData, COMMON_SAMPLE_RATE)) {
+    if (!resample(pSampleData, mp3.sampleRate, frameCount, resampledData, COMMON_SAMPLE_RATE)) {
       fprintf(stderr, "error: failed to resample MP3 data\n");
-      drmp3_free(pSampleData, nullptr);
+      delete[] pSampleData; // Releasing reallocated memory
       return false;
     }
-
-    pcmf32.swap(resampledData); // 使用转换后的数据
-
+    pcmf32.swap(resampledData); // Use of transformed data
   } else {
-    pcmf32.assign(pSampleData, pSampleData + frameCount * mp3.channels);
+    pcmf32.assign(pSampleData, pSampleData + frameCount);
   }
-  drmp3_free(pSampleData, nullptr);
-
+  //release
+  if (isAllocated) {
+    delete[] pSampleData; // If memory is reallocated, use the delete[]
+  } else {
+    drmp3_free(pSampleData, nullptr); // otherwise, use the drmp3_free
+  }
   return true;
 }
 
