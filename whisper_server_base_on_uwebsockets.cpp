@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-      // printf("%s: Received message on /streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
+       printf("%s: Received TEXT message on /streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
       auto jsonMsg = nlohmann::json::parse(message);
       std::string signal = jsonMsg["signal"];
       if (signal == "start") {
@@ -94,12 +94,14 @@ int main(int argc, char **argv) {
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      printf("%s: Received message size on /streaming/save: %zu\n", get_current_time().c_str(), size);
+      printf("%s: Received BINARY message size on /paddlespeech/streaming/save: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), data, size);
       //write to file
       wavWriter.write(pcm16.data(), size / 2);
+      // 发送服务器准备好的消息
+      response = {{"status", "ok"}};
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
