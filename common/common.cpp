@@ -774,7 +774,7 @@ bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo)
   drmp3_uint64 frameCount;
   float *pSampleData = drmp3__full_read_and_close_f32(&mp3, nullptr, &frameCount);
   bool isAllocated = false;
-  fprintf(stdout, "mp3.channels %d,mp3.sampleRate %d, frameCount:%d\n", mp3.channels, mp3.sampleRate, frameCount);
+  fprintf(stdout, "mp3.channels %d,mp3.sampleRate %d, frameCount:%llu\n", mp3.channels, mp3.sampleRate, frameCount);
 
   if (!stereo && mp3.channels == 2) {
     std::vector<float> monoData;
@@ -791,7 +791,7 @@ bool read_mp3(const std::string &fname, std::vector<float> &pcmf32, bool stereo)
     mp3.channels = 1;  // Update the number of channels
   }
 
-  printf("mp3.channels %d,mp3.sampleRate %d, frameCount:%d\n", mp3.channels, mp3.sampleRate, frameCount);
+  printf("mp3.channels %d,mp3.sampleRate %d, frameCount:%llu\n", mp3.channels, mp3.sampleRate, frameCount);
   if (mp3.sampleRate != COMMON_SAMPLE_RATE) {
     std::vector<float> resampledData;
     if (!resample(pSampleData, mp3.sampleRate, frameCount, resampledData, COMMON_SAMPLE_RATE)) {
