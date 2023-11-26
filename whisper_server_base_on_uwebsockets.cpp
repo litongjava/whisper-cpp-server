@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
       //echo
     .ws<std::string>("/echo", {.message = ws_echo_handler})
       //only_save_audio
-    .ws<std::string>("/streaming/save", {.open=[](auto *ws) {
+    .ws<std::string>("/paddlespeech/asr/save", {.open=[](auto *ws) {
       // 初始化用户数据
       auto *userData = (std::string *) ws->getUserData();
       *userData = "Create User Id";  // 设置初始值
