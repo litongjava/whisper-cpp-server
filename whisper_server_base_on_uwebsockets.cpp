@@ -9,6 +9,7 @@
 #include <whisper.h>
 #include <sstream>
 #include <speex/speex_preprocess.h>
+
 using namespace stream_components;
 
 int main(int argc, char **argv) {
@@ -65,10 +66,10 @@ int main(int argc, char **argv) {
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
 
-
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
-       printf("%s: Received TEXT message on /paddlespeech/streaming/save: %s\n", get_current_time().c_str(),std::string(message).c_str());
+      printf("%s: Received TEXT message on /paddlespeech/streaming/save: %s\n", get_current_time().c_str(),
+             std::string(message).c_str());
       auto jsonMsg = nlohmann::json::parse(message);
       std::string signal = jsonMsg["signal"];
       if (signal == "start") {
@@ -77,11 +78,25 @@ int main(int argc, char **argv) {
         } else {
           filename = std::to_string(get_current_time_millis()) + ".wav";
         }
+        uint32_t sampleRate = WHISPER_SAMPLE_RATE;
+        if (jsonMsg["sampleRate"].is_number_integer()) {
+          sampleRate = jsonMsg["sampleRate"].get<uint32_t>();
+        }
+        uint16_t bitsPerSample = 16;
+        if (jsonMsg["bitsPerSample"].is_number_integer()) {
+          bitsPerSample = jsonMsg["bitsPerSample"].get<uint16_t>();
+        }
+
+        uint16_t channels = 16;
+        if (jsonMsg["channels"].is_number_integer()) {
+          channels = jsonMsg["channels"].get<uint16_t>();
+        }
+
         // 发送服务器准备好的消息
         response = {{"status", "ok"},
                     {"signal", "server_ready"}};
         ws->send(response.dump(), uWS::OpCode::TEXT);
-        wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
+        wavWriter.open(filename, sampleRate, bitsPerSample, channels);
       }
       if (signal == "end") {
         wavWriter.close();
@@ -94,7 +109,8 @@ int main(int argc, char **argv) {
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      printf("%s: Received BINARY message size on /paddlespeech/streaming/save: %zu\n", get_current_time().c_str(), size);
+      printf("%s: Received BINARY message size on /paddlespeech/streaming/save: %zu\n", get_current_time().c_str(),
+             size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), data, size);
@@ -107,7 +123,8 @@ int main(int argc, char **argv) {
   };
 
   // WebSocket /paddlespeech/asr/streaming handler
-  auto ws_streaming_handler = [&whisperService, &params, &whisper_mutex](auto *ws, std::string_view message, uWS::OpCode opCode) {
+  auto ws_streaming_handler = [&whisperService, &params, &whisper_mutex](auto *ws, std::string_view message,
+                                                                         uWS::OpCode opCode) {
     thread_local std::vector<float> audioBuffer; //thread-localized variable
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
@@ -122,13 +139,14 @@ int main(int argc, char **argv) {
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
       // process text message
-      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),std::string(message).c_str());
+      printf("%s: Received message on /paddlespeech/asr/streaming: %s\n", get_current_time().c_str(),
+             std::string(message).c_str());
 
       try {
         auto jsonMsg = nlohmann::json::parse(message);
         std::string signal = jsonMsg["signal"];
         if (signal == "start") {
-          printf("%s start\n",get_current_time().c_str());
+          printf("%s start\n", get_current_time().c_str());
 
           if (jsonMsg["name"].is_string()) {
             filename = jsonMsg["name"];
@@ -146,11 +164,11 @@ int main(int argc, char **argv) {
 
         }
         if (signal == "end") {
-          printf("%s end\n",get_current_time().c_str());
+          printf("%s end\n", get_current_time().c_str());
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           response = {{"name",   filename},
                       {"signal", signal}};
-           printf("%s:buffer size:%lu\n",get_current_time().c_str(),audioBuffer.size());
+          printf("%s:buffer size:%lu\n", get_current_time().c_str(), audioBuffer.size());
           bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
           if (isOk) {
             final_results = get_result(whisperService.ctx);
@@ -193,7 +211,7 @@ int main(int argc, char **argv) {
           spx_int16_t frame[chunk_size];
           for (int j = 0; j < chunk_size; ++j) {
             if (i + j < pcm16.size()) {
-              frame[j] = (spx_int16_t)(pcm16[i + j]);
+              frame[j] = (spx_int16_t) (pcm16[i + j]);
             } else {
               frame[j] = 0; // 对于超出范围的部分填充 0
             }

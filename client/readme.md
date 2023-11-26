@@ -8,5 +8,6 @@ python client\websocket_client.py --server_ip 127.0.0.1 --port 8090 --wavfile sa
 ```
 only save audio
 ```shell script
-python client\websocket_client.py --server_ip 127.0.0.1 --port 8090 --endpoint /streaming/save --wavfile samples/jfk.wav
+python client\websocket_client.py --server_ip 127.0.0.1 --port 8090 --endpoint /paddlespeech/streaming/save --wavfile samples/jfk.wav
 ```
+
