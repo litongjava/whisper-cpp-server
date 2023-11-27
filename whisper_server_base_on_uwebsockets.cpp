@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
           bitsPerSample = jsonMsg["bitsPerSample"].get<uint16_t>();
         }
 
-        uint16_t channels = 16;
+        uint16_t channels = 1;
         if (jsonMsg["channels"].is_number_integer()) {
           channels = jsonMsg["channels"].get<uint16_t>();
         }
