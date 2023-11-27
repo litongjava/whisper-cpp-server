@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
     // printf("%s: User Data: %s\n", get_current_time().c_str(), userData->c_str());
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
+    uint16_t bitsPerSample;
 
     nlohmann::json response;
     if (opCode == uWS::OpCode::TEXT) {
@@ -82,9 +83,11 @@ int main(int argc, char **argv) {
         if (jsonMsg["sampleRate"].is_number_integer()) {
           sampleRate = jsonMsg["sampleRate"].get<uint32_t>();
         }
-        uint16_t bitsPerSample = 16;
+
         if (jsonMsg["bitsPerSample"].is_number_integer()) {
           bitsPerSample = jsonMsg["bitsPerSample"].get<uint16_t>();
+        }else{
+          bitsPerSample=16;
         }
 
         uint16_t channels = 1;
@@ -95,6 +98,8 @@ int main(int argc, char **argv) {
         // 发送服务器准备好的消息
         response = {{"status", "ok"},
                     {"signal", "server_ready"}};
+        printf("%s: Wav info:filename:%s, sampleRate:%d, bitsPerSample:%d, channels:%d \n",get_current_time().c_str(),
+               filename.c_str(),sampleRate,bitsPerSample,channels);
         ws->send(response.dump(), uWS::OpCode::TEXT);
         wavWriter.open(filename, sampleRate, bitsPerSample, channels);
       }
@@ -111,12 +116,36 @@ int main(int argc, char **argv) {
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
       printf("%s: Received BINARY message size on /paddlespeech/streaming/save: %zu\n", get_current_time().c_str(),
              size);
-      // add received PCM16 to audio cache
-      std::vector<int16_t> pcm16(size / 2);
-      std::memcpy(pcm16.data(), data, size);
-      //write to file
-      wavWriter.write(pcm16.data(), size / 2);
-      // 发送服务器准备好的消息
+      if(bitsPerSample==32){
+        // Make sure the data size is an integer multiple of the float size.
+        if (size % sizeof(float) != 0) {
+          std::cerr << "Received data size is not a multiple of sizeof(float)" << std::endl;
+          return;
+        }
+
+        size_t numFloats = size / sizeof(float);
+        std::vector<float> pcmf32(numFloats);
+        std::memcpy(pcmf32.data(), data, size);
+
+        // Convert float to int16_t
+        std::vector<int16_t> pcm16(numFloats);
+        for (size_t i = 0; i < numFloats; ++i) {
+          // Converts float samples in the range -1.0 to 1.0 to int16_t in the range -32768 to 32767.
+          float sample = pcmf32[i];
+          int16_t convertedSample = static_cast<int16_t>(std::max(-1.0f, std::min(1.0f, sample)) * 32767.0f);
+          pcm16[i] = convertedSample;
+        }
+
+        // write to file
+        wavWriter.write(pcm16.data(), pcm16.size());
+      }else{
+        // add received PCM16 to audio cache
+        std::vector<int16_t> pcm16(size / 2);
+        std::memcpy(pcm16.data(), data, size);
+        //write to file
+        wavWriter.write(pcm16.data(), size / 2);
+      }
+      // Send the message prepared by the server
       response = {{"status", "ok"}};
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
@@ -129,7 +158,7 @@ int main(int argc, char **argv) {
     thread_local wav_writer wavWriter;
     thread_local std::string filename;
     thread_local bool last_is_speech = false;
-    thread_local int chunk_size = 160; // 适用于 16 kHz 采样率的 100 毫秒帧
+    thread_local int chunk_size = 160; // 10 ms frame for 16 kHz sampling rate
     thread_local SpeexPreprocessState *st;
 
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
@@ -262,7 +291,3 @@ int main(int argc, char **argv) {
       //listen
     .listen(port, started_handler).run();
 }
-
-
-
-
