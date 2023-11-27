@@ -193,19 +193,22 @@ int main(int argc, char **argv) {
 
         }
         if (signal == "end") {
-          printf("%s end\n", get_current_time().c_str());
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           response = {{"name",   filename},
                       {"signal", signal}};
           printf("%s:buffer size:%lu\n", get_current_time().c_str(), audioBuffer.size());
           bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
+          audioBuffer.clear();
           if (isOk) {
             final_results = get_result(whisperService.ctx);
             response["result"] = final_results;
           }
-          ws->send(response.dump(), uWS::OpCode::TEXT);
+          const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &string = response.dump();
+          printf("%s %s\n", get_current_time().c_str(),string.c_str());
+          ws->send(string, uWS::OpCode::TEXT);
           wavWriter.close();
           speex_preprocess_state_destroy(st);
+          printf("%s End\n", get_current_time().c_str());
         }
         // other process logic...
       } catch (const std::exception &e) {
@@ -216,7 +219,7 @@ int main(int argc, char **argv) {
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
-      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
+//      printf("%s: Received message size on /paddlespeech/asr/streaming: %zu\n", get_current_time().c_str(), size);
       // add received PCM16 to audio cache
       std::vector<int16_t> pcm16(size / 2);
       std::memcpy(pcm16.data(), data, size);
@@ -246,14 +249,16 @@ int main(int argc, char **argv) {
             }
           }
           int is_speech = speex_preprocess_run(st, frame);
-
           // printf("%s: is_active: %d,is_last_active %d\n", get_current_time().c_str(), is_speech, last_is_speech);
           if (!is_speech && last_is_speech) {
             isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
             audioBuffer.clear();
+            last_is_speech = is_speech;
             break;
+          }else{
+            last_is_speech = is_speech;
           }
-          last_is_speech = is_speech != 0;
+
 
         }
         whisper_mutex.unlock();
@@ -269,6 +274,7 @@ int main(int argc, char **argv) {
         final_results = get_result(whisperService.ctx);
         response["result"] = final_results;
       }
+      response["status"]="ok";
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
