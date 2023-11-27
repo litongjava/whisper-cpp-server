@@ -86,8 +86,8 @@ int main(int argc, char **argv) {
 
         if (jsonMsg["bitsPerSample"].is_number_integer()) {
           bitsPerSample = jsonMsg["bitsPerSample"].get<uint16_t>();
-        }else{
-          bitsPerSample=16;
+        } else {
+          bitsPerSample = 16;
         }
 
         uint16_t channels = 1;
@@ -98,8 +98,8 @@ int main(int argc, char **argv) {
         // 发送服务器准备好的消息
         response = {{"status", "ok"},
                     {"signal", "server_ready"}};
-        printf("%s: Wav info:filename:%s, sampleRate:%d, bitsPerSample:%d, channels:%d \n",get_current_time().c_str(),
-               filename.c_str(),sampleRate,bitsPerSample,channels);
+        printf("%s: Wav info:filename:%s, sampleRate:%d, bitsPerSample:%d, channels:%d \n", get_current_time().c_str(),
+               filename.c_str(), sampleRate, bitsPerSample, channels);
         ws->send(response.dump(), uWS::OpCode::TEXT);
         wavWriter.open(filename, sampleRate, bitsPerSample, channels);
       }
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
       printf("%s: Received BINARY message size on /paddlespeech/streaming/save: %zu\n", get_current_time().c_str(),
              size);
-      if(bitsPerSample==32){
+      if (bitsPerSample == 32) {
         // Make sure the data size is an integer multiple of the float size.
         if (size % sizeof(float) != 0) {
           std::cerr << "Received data size is not a multiple of sizeof(float)" << std::endl;
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 
         // write to file
         wavWriter.write(pcm16.data(), pcm16.size());
-      }else{
+      } else {
         // add received PCM16 to audio cache
         std::vector<int16_t> pcm16(size / 2);
         std::memcpy(pcm16.data(), data, size);
@@ -192,6 +192,19 @@ int main(int argc, char **argv) {
           speex_preprocess_ctl(st, SPEEX_PREPROCESS_SET_VAD, &vad);
 
         }
+        if (signal == "recognize") {
+          printf("%s:buffer size:%lu\n", get_current_time().c_str(), audioBuffer.size());
+          bool isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
+          audioBuffer.clear();
+          if (isOk) {
+            final_results = get_result(whisperService.ctx);
+            response["result"] = final_results;
+          }
+          response["status"] = "ok";
+          ws->send(response.dump(), uWS::OpCode::TEXT);
+        }
+
+
         if (signal == "end") {
 //          nlohmann::json response = {{"name",filename},{"signal", signal}};
           response = {{"name",   filename},
@@ -204,7 +217,7 @@ int main(int argc, char **argv) {
             response["result"] = final_results;
           }
           const std::basic_string<char, std::char_traits<char>, std::allocator<char>> &string = response.dump();
-          printf("%s %s\n", get_current_time().c_str(),string.c_str());
+          printf("%s %s\n", get_current_time().c_str(), string.c_str());
           ws->send(string, uWS::OpCode::TEXT);
           wavWriter.close();
           speex_preprocess_state_destroy(st);
@@ -255,7 +268,7 @@ int main(int argc, char **argv) {
             audioBuffer.clear();
             last_is_speech = is_speech;
             break;
-          }else{
+          } else {
             last_is_speech = is_speech;
           }
 
@@ -274,7 +287,7 @@ int main(int argc, char **argv) {
         final_results = get_result(whisperService.ctx);
         response["result"] = final_results;
       }
-      response["status"]="ok";
+      response["status"] = "ok";
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
   };
