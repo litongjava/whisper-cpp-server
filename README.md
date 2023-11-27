@@ -1,4 +1,17 @@
 # whisper-cpp service
+## Real-time speech  
+Real-time speech recognition and display of recognition results in the browser
+backend
+```
+https://github.com/litongjava/whisper-cpp-server
+```
+frontend
+```
+https://github.com/litongjava/listen-know-web
+```
+Test video  
+
+https://github.com/litongjava/whisper-cpp-server/assets/31761981/ba7268fa-312c-47b2-a538-804b96bb656f
 ## simplest
 ```shell
 cmake-build-debug/simplest -m models/ggml-base.en.bin samples/jfk.wav
