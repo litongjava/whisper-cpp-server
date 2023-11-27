@@ -343,6 +343,11 @@ bool run(std::mutex &whisper_mutex, whisper_params &params, whisper_context *ctx
 
 void handleInference(const Request &request, Response &response, std::mutex &whisper_mutex, whisper_params &params,
                      whisper_context *ctx, char *arg_audio_file) {
+
+  // set CORS hander
+  response.set_header("Access-Control-Allow-Origin", "*");
+  response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  response.set_header("Access-Control-Allow-Headers", "Content-Type");
   // first check user requested fields of the request
   if (!request.has_file("file")) {
     fprintf(stderr, "error: no 'file' field in the request\n");
