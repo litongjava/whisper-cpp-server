@@ -11,6 +11,13 @@ WhisperService::WhisperService(const struct service_params &service_params,
   : service_params(service_params),
     audio_params(audio_params),
     ctx(whisper_init_from_file_with_params(service_params.model.c_str(), cparams)) {
+  // print system information
+  {
+    fprintf(stderr, "\n");
+    fprintf(stderr, "system_info: n_threads = %d / %d | %s\n",
+            service_params.n_threads * service_params.n_processors, std::thread::hardware_concurrency(),
+            whisper_print_system_info());
+  }
   {
     fprintf(stderr, "\n");
     if (!whisper_is_multilingual(ctx)) {
@@ -21,16 +28,17 @@ WhisperService::WhisperService(const struct service_params &service_params,
                 __func__);
       }
     }
-    fprintf(stderr, "%s: serving with %d threads, lang = %s, task = %s, timestamps = %d ...\n",
+    fprintf(stderr, "%s: serving with %d threads, %d processors, lang = %s, task = %s, timestamps = %d ...\n",
             __func__,
             service_params.n_threads,
+            service_params.n_processors,
             service_params.language.c_str(),
             service_params.translate ? "translate" : "transcribe",
             service_params.no_timestamps ? 0 : 1);
 
-    // if (!params.use_vad) {
-    //     fprintf(stderr, "%s: n_new_line = %d, no_context = %d\n", __func__, n_new_line, params.no_context);
-    // }
+//     if (!audio_params.use_vad) {
+//         fprintf(stderr, "%s: n_new_line = %d, no_context = %d\n", __func__, n_new_line, service_params.no_context);
+//     }
 
     fprintf(stderr, "\n");
   }
@@ -73,7 +81,7 @@ bool WhisperService::process(const float *samples, int sample_count) {
 //    return false;
 //  }
   //whisper_full_parallel
-  if (whisper_full_parallel(ctx, wparams, samples, sample_count,service_params.n_processors) != 0) {
+  if (whisper_full_parallel(ctx, wparams, samples, sample_count, service_params.n_processors) != 0) {
     //error:ggml_metal_get_buffer: error: buffer is nil
     return false;
   }
