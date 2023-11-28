@@ -36,9 +36,9 @@ namespace stream_components {
   };
 
   struct service_params {
-    int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
+    int32_t n_threads = std::min(8, (int32_t) std::thread::hardware_concurrency());
     int32_t n_processors = 1;
-    bool speed_up = false;
+    bool speed_up = true;
     bool translate = false;
     bool no_fallback = false;
     bool no_context = true;
