@@ -116,9 +116,10 @@ class ASRWsAudioHandler:
     """
     logging.debug("send a message to the server")
 
+    results = []
     if self.url is None:
       self.logger.error("No asr server, please input valid ip and port")
-      return ""
+      return results
 
     # 1. send websocket handshake protocal
     start_time = time.time()
@@ -144,8 +145,15 @@ class ASRWsAudioHandler:
         msg = await ws.recv()
         if msg:
           try:
-            parsed_msg = json.loads(msg)
-            self.logger.info("client receive msg={}".format(parsed_msg))
+            json_object = json.loads(msg)
+            self.logger.info("client receive msg={}".format(json_object))
+            if "result" in json_object:
+              result = json_object.get("result")
+              for sentence in result:
+                # print(type(sentence))
+                sentence = "{}->{}:{}".format(sentence['t0'], sentence['t1'], sentence['sentence'])
+                results.append(sentence)
+                # print(sentence)
           except Exception as e:
             self.logger.error("Unexpected error: {}".format(e))
 
@@ -163,17 +171,25 @@ class ASRWsAudioHandler:
       msg = await ws.recv()
 
       # 5. decode the bytes to str
-      msg = json.loads(msg)
+      json_object = json.loads(msg)
 
       # 6. logging the final result and comptute the statstics
       elapsed_time = time.time() - start_time
       audio_info = soundfile.info(wavfile_path)
-      self.logger.info("client final receive msg={}".format(msg))
+      self.logger.info("client final receive msg={}".format(json_object))
+
+      # print(type(json_object))
+      if "result" in json_object:
+        result = json_object.get("result")
+        for sentence in result:
+          # print(type(sentence))
+          sentence = "{}->{}:{}".format(sentence['t0'], sentence['t1'], sentence['sentence'])
+          results.append(sentence)
+          # print(sentence)
       self.logger.info(
         f"audio duration: {audio_info.duration}, elapsed time: {elapsed_time}, RTF={elapsed_time / audio_info.duration}"
       )
-      result = msg
-      return result
+      return results
 
 
 logger = Logger()
@@ -191,11 +207,10 @@ def main(args):
   # support to process single audio file
   if args.wavfile and os.path.exists(args.wavfile):
     logger.info(f"start to process the wavscp: {args.wavfile}")
-    result = loop.run_until_complete(handler.run(args.wavfile))
-    if result:
-      result = result["result"]
-
-    logger.info(f"asr websocket client finished : {result}")
+    results = loop.run_until_complete(handler.run(args.wavfile))
+    if results:
+      for sentence in results:
+        print(sentence)
 
   # support to process batch audios from wav.scp
   if args.wavscp and os.path.exists(args.wavscp):
