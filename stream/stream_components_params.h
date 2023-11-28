@@ -38,11 +38,11 @@ namespace stream_components {
   struct service_params {
     int32_t n_threads = std::min(8, (int32_t) std::thread::hardware_concurrency());
     int32_t n_processors = 1;
-    bool speed_up = true;
+    bool speed_up = false;
     bool translate = false;
     bool no_fallback = false;
     bool no_context = true;
-    bool no_timestamps = false;
+    bool no_timestamps = true;
     bool save_audio = false;
 
     bool tinydiarize = false;
