@@ -102,6 +102,8 @@ bool whisper_params_parse(int argc, char **argv, whisper_local_params &params) {
       exit(0);
     } else if (arg == "-m" || arg == "--model") { params.model = argv[++i]; }
     else if (arg == "-di" || arg == "--diarize") { params.diarize = true; }
+    else if (arg == "-t" || arg == "--threads") { params.n_threads = std::stoi(argv[++i]); }
+    else if (arg == "-p" || arg == "--processors") { params.n_processors = std::stoi(argv[++i]); }
     else {
       fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
       whisper_print_usage(argc, argv, params);
@@ -313,7 +315,7 @@ int main(int argc, char **argv) {
   cparams.use_gpu = params.use_gpu;
 
   struct whisper_context *ctx = whisper_init_from_file_with_params(params.model.c_str(),
-    cparams);
+                                                                   cparams);
 
   if (ctx == nullptr) {
     fprintf(stderr, "error: failed to initialize whisper context\n");
@@ -327,7 +329,7 @@ int main(int argc, char **argv) {
   for (int f = 0; f < (int) params.fname_inp.size(); ++f) {
     const auto fname_inp = params.fname_inp[f];
     const auto fname_out = f < (int) params.fname_out.size() && !params.fname_out[f].empty()
-      ? params.fname_out[f]: params.fname_inp[f];
+                           ? params.fname_out[f] : params.fname_inp[f];
 
     std::vector<float> pcmf32;               // mono-channel F32 PCM
     std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
@@ -430,7 +432,7 @@ int main(int argc, char **argv) {
         static bool is_aborted = false; // NOTE: this should be atomic to avoid data race
 
         wparams.encoder_begin_callback = [](struct whisper_context * /*ctx*/,
-          struct whisper_state * /*state*/,
+                                            struct whisper_state * /*state*/,
                                             void *user_data) {
           bool is_aborted = *(bool *) user_data;
           return !is_aborted;

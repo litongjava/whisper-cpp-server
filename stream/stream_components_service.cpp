@@ -69,13 +69,14 @@ bool WhisperService::process(const float *samples, int sample_count) {
   wparams.prompt_n_tokens = service_params.no_context ? 0 : prompt_tokens.size();
 
   // *** Run the actual inference!!! ***
-  if (whisper_full(ctx, wparams, samples, sample_count) != 0) {
+//  if (whisper_full(ctx, wparams, samples, sample_count) != 0) {
+//    return false;
+//  }
+  //whisper_full_parallel
+  if (whisper_full_parallel(ctx, wparams, samples, sample_count,service_params.n_processors) != 0) {
+    //error:ggml_metal_get_buffer: error: buffer is nil
     return false;
   }
-  //if (whisper_full_parallel(ctx, wparams, samples, sample_count,service_params.n_processors) != 0) {
-  // error:ggml_metal_get_buffer: error: buffer is nil
-  //return false;
-
 
 // Now sure whether n_iter and n_new_line should have ever been there...
 // *** SUSPICIOUS what happens by removing them? Are they essential?

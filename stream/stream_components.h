@@ -55,6 +55,7 @@ namespace stream_components {
         whisper_print_usage(argc, argv, params);
         exit(0);
       } else if (arg == "-t" || arg == "--threads") { params.service.n_threads = std::stoi(argv[++i]); }
+      else if (arg == "-p" || arg == "--processors") { params.service.n_processors = std::stoi(argv[++i]); }
       else if (arg == "--step") { params.audio.step_ms = std::stoi(argv[++i]); }
       else if (arg == "--length") { params.audio.length_ms = std::stoi(argv[++i]); }
       else if (arg == "--keep") { params.audio.keep_ms = std::stoi(argv[++i]); }
