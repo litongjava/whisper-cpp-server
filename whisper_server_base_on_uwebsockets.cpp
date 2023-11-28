@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
     thread_local std::string filename;
     thread_local bool last_is_speech = false;
     thread_local int chunk_size = 160; // 10 ms frame for 16 kHz sampling rate
-    thread_local SpeexPreprocessState *st;
+    thread_local SpeexPreprocessState *state;
 
     //std::unique_ptr<nlohmann::json> results(new nlohmann::json(nlohmann::json::array()));
     thread_local nlohmann::json final_results;
@@ -187,9 +187,27 @@ int main(int argc, char **argv) {
                       {"signal", "server_ready"}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
           wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
-          st = speex_preprocess_state_init(chunk_size, WHISPER_SAMPLE_RATE);
+          state= speex_preprocess_state_init(chunk_size, WHISPER_SAMPLE_RATE);
           int vad = 1;
-          speex_preprocess_ctl(st, SPEEX_PREPROCESS_SET_VAD, &vad);
+          speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_VAD, &vad);
+          //1. 提高 VAD 灵敏度：
+          int prob_start = 80;  // 范围从 0 到 100
+          int prob_continue = 65;  // 范围从 0 到 100
+          speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_PROB_START, &prob_start);
+          speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_PROB_CONTINUE, &prob_continue);
+
+          //2. 噪音抑制：
+          int noise_suppress = -30; // dB, 可以尝试 -30 到 -15
+          speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &noise_suppress);
+
+          //3. 回声消除:
+          // SpeexEchoState *echo_state = speex_echo_state_init(chunk_size, echo_tail);
+          // speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_ECHO_STATE, echo_state);
+
+          //4. 自动增益控制（AGC）：
+          // int agc = 1; // 开启 AGC
+          // speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_AGC, &agc);
+
 
         }
         if (signal == "recognize") {
@@ -220,7 +238,7 @@ int main(int argc, char **argv) {
           printf("%s %s\n", get_current_time().c_str(), string.c_str());
           ws->send(string, uWS::OpCode::TEXT);
           wavWriter.close();
-          speex_preprocess_state_destroy(st);
+          speex_preprocess_state_destroy(state);
           printf("%s End\n", get_current_time().c_str());
         }
         // other process logic...
@@ -261,7 +279,7 @@ int main(int argc, char **argv) {
               frame[j] = 0; // 对于超出范围的部分填充 0
             }
           }
-          int is_speech = speex_preprocess_run(st, frame);
+          int is_speech = speex_preprocess_run(state, frame);
           // printf("%s: is_active: %d,is_last_active %d\n", get_current_time().c_str(), is_speech, last_is_speech);
           if (!is_speech && last_is_speech) {
             isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
