@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
                       {"signal", "server_ready"}};
           ws->send(response.dump(), uWS::OpCode::TEXT);
           wavWriter.open(filename, WHISPER_SAMPLE_RATE, 16, 1);
-          state= speex_preprocess_state_init(chunk_size, WHISPER_SAMPLE_RATE);
+          state = speex_preprocess_state_init(chunk_size, WHISPER_SAMPLE_RATE);
           int vad = 1;
           speex_preprocess_ctl(state, SPEEX_PREPROCESS_SET_VAD, &vad);
           //1. 提高 VAD 灵敏度：
@@ -247,6 +247,8 @@ int main(int argc, char **argv) {
         auto size = message.size();
       }
     } else if (opCode == uWS::OpCode::BINARY) {
+      auto handler_binary_start = std::chrono::high_resolution_clock::now();
+
       // process binary message（PCM16 data）
       auto size = message.size();
       std::basic_string_view<char, std::char_traits<char>>::const_pointer data = message.data();
@@ -282,7 +284,17 @@ int main(int argc, char **argv) {
           int is_speech = speex_preprocess_run(state, frame);
           // printf("%s: is_active: %d,is_last_active %d\n", get_current_time().c_str(), is_speech, last_is_speech);
           if (!is_speech && last_is_speech) {
-            isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
+            size_t sampleCount = audioBuffer.size();
+            double durationInSeconds = static_cast<double>(sampleCount) / WHISPER_SAMPLE_RATE;
+            auto process_start = std::chrono::high_resolution_clock::now();
+
+            isOk = whisperService.process(audioBuffer.data(), sampleCount);
+
+            auto process_stop = std::chrono::high_resolution_clock::now();
+            auto process_duration = std::chrono::duration_cast<std::chrono::milliseconds>(process_stop - process_start);
+
+            printf("Execution Time: %lld milliseconds audioBuffer size: %zu elements Audio Duration: %f seconds\n",
+                   process_duration.count(), sampleCount, durationInSeconds);
             audioBuffer.clear();
             last_is_speech = is_speech;
             break;
@@ -296,11 +308,25 @@ int main(int argc, char **argv) {
       } else {
         // asr
         whisper_mutex.lock();
-        isOk = whisperService.process(audioBuffer.data(), audioBuffer.size());
-        audioBuffer.clear();
+        size_t sampleCount = audioBuffer.size();
+        double durationInSeconds = static_cast<double>(sampleCount) / WHISPER_SAMPLE_RATE;
+        auto process_start = std::chrono::high_resolution_clock::now();
+
+        isOk = whisperService.process(audioBuffer.data(), sampleCount);
+        auto process_stop = std::chrono::high_resolution_clock::now();
+        auto process_duration = std::chrono::duration_cast<std::chrono::milliseconds>(process_stop - process_start);
+
+        printf("Execution Time: %lld milliseconds audioBuffer size: %zu elements Audio Duration: %f seconds\n",
+               process_duration.count(), sampleCount, durationInSeconds);
         whisper_mutex.unlock();
       }
       // printf("%s: is_ok: %d \n", get_current_time().c_str(), isOk);
+      auto handler_binary_stop = std::chrono::high_resolution_clock::now();
+      auto handler_binary_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        handler_binary_stop - handler_binary_start);
+
+      printf("Execution Time: %lld milliseconds", handler_binary_duration.count());
+
       if (isOk) {
         final_results = get_result(whisperService.ctx);
         response["result"] = final_results;
@@ -308,6 +334,7 @@ int main(int argc, char **argv) {
       response["status"] = "ok";
       ws->send(response.dump(), uWS::OpCode::TEXT);
     }
+
   };
 
 
