@@ -293,8 +293,9 @@ int main(int argc, char **argv) {
             auto process_stop = std::chrono::high_resolution_clock::now();
             auto process_duration = std::chrono::duration_cast<std::chrono::milliseconds>(process_stop - process_start);
 
-            printf("Execution Time: %lld milliseconds audioBuffer size: %zu elements Audio Duration: %f seconds\n",
-                   process_duration.count(), sampleCount, durationInSeconds);
+            printf(
+              "process execution time: %lld milliseconds audioBuffer size: %zu elements Audio Duration: %f seconds\n",
+              process_duration.count(), sampleCount, durationInSeconds);
             audioBuffer.clear();
             last_is_speech = is_speech;
             break;
@@ -321,15 +322,29 @@ int main(int argc, char **argv) {
         whisper_mutex.unlock();
       }
       // printf("%s: is_ok: %d \n", get_current_time().c_str(), isOk);
-      auto handler_binary_stop = std::chrono::high_resolution_clock::now();
-      auto handler_binary_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-        handler_binary_stop - handler_binary_start);
-
-      printf("Execution Time: %lld milliseconds", handler_binary_duration.count());
-
       if (isOk) {
-        final_results = get_result(whisperService.ctx);
+//        final_results = get_result(whisperService.ctx);
+        final_results = nlohmann::json(nlohmann::json::array());
+        const int n_segments = whisper_full_n_segments(whisperService.ctx);
+        for (int i = 0; i < n_segments; ++i) {
+          nlohmann::json segment_json_object;
+          int64_t t0 = whisper_full_get_segment_t0(whisperService.ctx, i);
+          int64_t t1 = whisper_full_get_segment_t1(whisperService.ctx, i);
+          const char *sentence = whisper_full_get_segment_text(whisperService.ctx, i);
+          auto result = std::to_string(t0) + "-->" + std::to_string(t1) + ":" + sentence + "\n";
+          printf("result:%s", result.c_str());
+          segment_json_object["t0"] = to_timestamp(t0);
+          segment_json_object["t1"] = to_timestamp(t1);
+          segment_json_object["sentence"] = sentence;
+          final_results.push_back(segment_json_object);
+        }
         response["result"] = final_results;
+        auto handler_binary_stop = std::chrono::high_resolution_clock::now();
+        auto handler_binary_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+          handler_binary_stop - handler_binary_start);
+
+        printf("Handler binary execution time: %lld milliseconds\n\n",
+               handler_binary_duration.count());
       }
       response["status"] = "ok";
       ws->send(response.dump(), uWS::OpCode::TEXT);
