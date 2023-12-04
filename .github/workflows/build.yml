@@ -6,12 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  build_macos:
+  build_ubuntu:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -44,4 +42,42 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: cmake-build-release-ubuntu-latest
+          path: cmake-build-release/
+
+  build_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          brew install cmake
+          brew install nasm
+
+      - name: Cmake Version
+        run: |
+          cmake --version
+
+      - name: Setup vcpkg
+        run: |
+          export VCPKG_HOME=$PWD/vcpkg
+          echo $VCPKG_HOME 
+          git clone https://github.com/microsoft/vcpkg $VCPKG_HOME
+          $VCPKG_HOME/bootstrap-vcpkg.sh
+
+      - name: Configure CMake
+        run: |
+          export VCPKG_HOME=$PWD/vcpkg
+          cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build
+        run: cmake --build cmake-build-release --config Release -- -j
+
+      - name: Copy Additional Files
+        run: cp ./ggml-metal.metal cmake-build-release
+
+      - name: Archive Build Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cmake-build-release-macos-latest
           path: cmake-build-release/

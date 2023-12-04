@@ -82,7 +82,7 @@ elseif (APPLE)
     target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv_a)
 else ()
     # if others eg. Linux
-    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv)
+    target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE libuv::uv_a)
 endif ()
 
 target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB ${USOCKETS_LIBRARY}
