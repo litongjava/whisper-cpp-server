@@ -26,8 +26,8 @@ jobs:
         run: |
           export VCPKG_HOME=$PWD/vcpkg
           echo $VCPKG_HOME 
-          git clone https://github.com/microsoft/vcpkg ${{ env.VCPKG_HOME }}
-          ${{ env.VCPKG_HOME }}/bootstrap-vcpkg.sh
+          git clone https://github.com/microsoft/vcpkg $VCPKG_HOME
+          $VCPKG_HOME/bootstrap-vcpkg.sh
 
       - name: Configure CMake
         run: cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
