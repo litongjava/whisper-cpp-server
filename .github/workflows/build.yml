@@ -1,0 +1,44 @@
+name: C++ Build with CMake and vcpkg
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ cmake
+
+      - name: Cmake Version
+        run: |
+          cmake --version
+
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg ${{ env.VCPKG_HOME }}
+          ${{ env.VCPKG_HOME }}/bootstrap-vcpkg.sh
+
+      - name: Configure CMake
+        run: cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build
+        run: cmake --build cmake-build-release --config Release -- -j 12
+
+      - name: Copy Additional Files
+        run: cp ./ggml-metal.metal cmake-build-release
+
+      - name: Archive Build Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cmake-build-release-ubuntu-latest
+          path: cmake-build-release/
