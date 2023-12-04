@@ -30,7 +30,9 @@ jobs:
           $VCPKG_HOME/bootstrap-vcpkg.sh
 
       - name: Configure CMake
-        run: cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+        run: |
+          export VCPKG_HOME=$PWD/vcpkg
+          cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
 
       - name: Build
         run: cmake --build cmake-build-release --config Release -- -j 12
