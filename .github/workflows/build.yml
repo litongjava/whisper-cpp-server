@@ -6,9 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  build_macos:
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
