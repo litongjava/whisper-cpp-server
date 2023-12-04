@@ -24,7 +24,8 @@ jobs:
 
       - name: Setup vcpkg
         run: |
-          echo "VCPKG_HOME=$PWD/vcpkg" >> $GITHUB_ENV
+          export VCPKG_HOME=$PWD/vcpkg
+          echo $VCPKG_HOME 
           git clone https://github.com/microsoft/vcpkg ${{ env.VCPKG_HOME }}
           ${{ env.VCPKG_HOME }}/bootstrap-vcpkg.sh
 
