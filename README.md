@@ -12,6 +12,39 @@ https://github.com/litongjava/listen-know-web
 Test video  
 
 https://github.com/litongjava/whisper-cpp-server/assets/31761981/ba7268fa-312c-47b2-a538-804b96bb656f
+## How to build it 
+build with cmake and vcpkg
+```
+export VCPKG_HOME=/Users/ping/vcpkg
+cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+cmake --build cmake-build-release --config Release -- -j 12
+cp ./ggml-metal.metal cmake-build-release 
+```
+
+
+run with simplest
+```
+./cmake-build-release/simplest -m models/ggml-base.en.bin test.wav
+```
+
+run with http-server
+```
+./cmake-build-release/whisper_http_server_base_httplib -m models/ggml-base.en.bin 
+```
+
+run with websocket-server
+```
+./cmake-build-release/whisper_server_base_on_uwebsockets -m models/ggml-base.en.bin
+```
+
+copy command
+```
+mkdir bin
+cp ./ggml-metal.metal bin
+cp ./cmake-build-release/simplest bin
+cp ./cmake-build-release/whisper_http_server_base_httplib bin 
+cp ./cmake-build-release/whisper_server_base_on_uwebsockets bin
+```
 ## simplest
 ```shell
 cmake-build-debug/simplest -m models/ggml-base.en.bin samples/jfk.wav
