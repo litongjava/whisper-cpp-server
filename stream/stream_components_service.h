@@ -8,24 +8,26 @@
 
 using std::shared_ptr;
 
-namespace stream_components {
+namespace stream_components
+{
 
-/**
- * Encapsulates the Whisper service.
- */
-  class WhisperService {
+  /**
+   * Encapsulates the Whisper service.
+   */
+  class WhisperService
+  {
   public:
     WhisperService(
-      const struct service_params &server_params,
-      const struct audio_params &audio_params,
-      const struct whisper_context_params &cparams);
+        const struct service_params &sparams,
+        const struct audio_params &aparams,
+        const struct whisper_context_params &cparams);
 
     ~WhisperService();
 
-    bool process(const float *samples,int size);
+    bool process(const float *samples, int size);
 
-    service_params service_params;
-    audio_params audio_params;
+    service_params sparams;
+    audio_params aparams;
 
     struct whisper_context *ctx;
 
