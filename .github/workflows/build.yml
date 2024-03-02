@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+            submodules: recursive
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -20,17 +22,9 @@ jobs:
         run: |
           cmake --version
 
-      - name: Setup vcpkg
-        run: |
-          export VCPKG_HOME=$PWD/vcpkg
-          echo $VCPKG_HOME 
-          git clone https://github.com/microsoft/vcpkg $VCPKG_HOME
-          $VCPKG_HOME/bootstrap-vcpkg.sh
-
       - name: Configure CMake
         run: |
-          export VCPKG_HOME=$PWD/vcpkg
-          cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+          cmake -B cmake-build-release
 
       - name: Build
         run: cmake --build cmake-build-release --config Release -- -j 12
@@ -48,7 +42,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-
+        with:
+            submodules: recursive
       - name: Install Dependencies
         run: |
           brew install cmake
@@ -60,14 +55,13 @@ jobs:
 
       - name: Setup vcpkg
         run: |
-          export VCPKG_HOME=$PWD/vcpkg
+          export VCPKG_HOME=$PWD/thirdparty/vcpkg
           echo $VCPKG_HOME 
-          git clone https://github.com/microsoft/vcpkg $VCPKG_HOME
           $VCPKG_HOME/bootstrap-vcpkg.sh
 
       - name: Configure CMake
         run: |
-          export VCPKG_HOME=$PWD/vcpkg
+          export VCPKG_HOME=$PWD/thirdparty/vcpkg
           cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
 
       - name: Build

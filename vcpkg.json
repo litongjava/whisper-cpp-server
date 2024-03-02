@@ -25,5 +25,8 @@
   }, {
     "name" : "nlohmann-json",
     "version>=" : "3.11.2"
+  }, {
+    "name" : "libuv",
+    "version>=" : "1.46.0"
   } ]
 }
