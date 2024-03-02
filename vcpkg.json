@@ -19,5 +19,11 @@
   }, {
     "name" : "speexdsp",
     "version>=" : "1.2.1#1"
+  }, {
+    "name" : "cpp-httplib",
+    "version>=" : "0.14.1"
+  }, {
+    "name" : "nlohmann-json",
+    "version>=" : "3.11.2"
   } ]
 }

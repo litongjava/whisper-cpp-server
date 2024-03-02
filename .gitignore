@@ -155,3 +155,5 @@ Debug/
 *.wav
 cmake-build-release/
 whisper-cpp-server.zip
+
+.cache

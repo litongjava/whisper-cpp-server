@@ -16,13 +16,10 @@ https://github.com/litongjava/whisper-cpp-server/assets/31761981/ba7268fa-312c-4
 ## How to build it 
 build with cmake and vcpkg
 ```
-export VCPKG_HOME=/Users/ping/vcpkg
-cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake
+cmake -B cmake-build-release
 cmake --build cmake-build-release --config Release -- -j 12
 cp ./ggml-metal.metal cmake-build-release 
 ```
-
-After executing cmake -B cmake-build-release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg. cmake automatically executes the vcpkg install
 
 run with simplest
 ```

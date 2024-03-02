@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../httplib/httplib.h"
+#include "httplib.h"
 #include "../params/whisper_params.h"
 
 using namespace httplib;

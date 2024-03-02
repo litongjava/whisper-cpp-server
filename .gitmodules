@@ -1,0 +1,9 @@
+[submodule "thirdparty/vcpkg"]
+	path = thirdparty/vcpkg
+	url = https://github.com/microsoft/vcpkg
+[submodule "thirdparty/whisper.cpp"]
+	path = thirdparty/whisper.cpp
+	url = https://github.com/ggerganov/whisper.cpp.git
+[submodule "thirdparty/dr_libs"]
+	path = thirdparty/dr_libs
+	url = https://github.com/mackron/dr_libs.git

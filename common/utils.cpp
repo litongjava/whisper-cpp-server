@@ -7,7 +7,6 @@
 #include <sstream>
 #include <iomanip>
 #include <whisper.h>
-#include "../nlohmann/json.hpp"
 
 
 std::string get_current_time() {
