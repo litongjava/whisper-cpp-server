@@ -24,19 +24,19 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B cmake-build-release
+          cmake -B cmake-build-release-linux
 
       - name: Build
-        run: cmake --build cmake-build-release --config Release -- -j 12
+        run: cmake --build cmake-build-release-linux --config Release -- -j 12
 
       - name: Copy Additional Files
-        run: cp ./ggml-metal.metal cmake-build-release
+        run: cp ./ggml-metal.metal cmake-build-release-linux
 
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: cmake-build-release-ubuntu-latest
-          path: cmake-build-release/
+          path: cmake-build-release-linux/
 
   build_macos:
     runs-on: macos-latest
