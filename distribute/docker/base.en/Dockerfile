@@ -1,6 +1,6 @@
 FROM litongjava/whisper-cpp-server:1.0.0
 
-COPY models/ggml-large-v3.bin /app/models/
+COPY models/ggml-base.en.bin /app/models/
 
 EXPOSE 8080
 
