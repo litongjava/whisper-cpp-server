@@ -16,9 +16,9 @@ find_package(SDL2 CONFIG REQUIRED GLOBAL)
 
 find_package(SampleRate CONFIG REQUIRED GLOBAL)
 find_package(FFMPEG REQUIRED GLOBAL)
-# 查找 SpeexDSP 库
+# find SpeexDSP library
 find_library(SPEEXDSP_LIBRARY NAMES speexdsp)
-# 查找头文件
+# find SPEEXDSP header file
 find_path(SPEEXDSP_INCLUDE_DIRS "speex/speex_preprocess.h")
 
 # httplib

@@ -8,7 +8,7 @@ add_subdirectory(thirdparty)
 add_executable(audio_vad examples/audio_vad.cpp common/common.cpp
         stream/stream_components_service.cpp common/utils.cpp)
 target_link_libraries(audio_vad PRIVATE whisper SampleRate::samplerate ${SPEEXDSP_LIBRARY} nlohmann_json::nlohmann_json dr_lib_header-only)
-# 链接头文件
+#  linke header file
 target_include_directories(audio_vad PRIVATE ${SPEEXDSP_INCLUDE_DIRS})
 
 
@@ -51,6 +51,6 @@ endif ()
 
 target_link_libraries(whisper_server_base_on_uwebsockets PRIVATE whisper ZLIB::ZLIB ${USOCKETS_LIBRARY}
         SampleRate::samplerate ${SPEEXDSP_LIBRARY} nlohmann_json::nlohmann_json dr_lib_header-only)
-# 链接头文件
+# linked header file
 target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${SPEEXDSP_INCLUDE_DIRS})
 
