@@ -349,19 +349,19 @@ int main(int argc, char **argv) {
 
 
   // config uWebSockets app
-  uWS::App()
-    //hello
-    .get("/hello", hello_action)
-      //echo
-    .ws<std::string>("/echo", {.message = ws_echo_handler})
-      //only_save_audio
-    .ws<std::string>("/paddlespeech/streaming/save", {.open=[](auto *ws) {
-      // init user data
-      auto *userData = (std::string *) ws->getUserData();
-      *userData = "Create User Id";  // set user data
-    }, .message = ws_save_handler})
-      //streaming asr
-    .ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler})
-      //listen
-    .listen(port, started_handler).run();
+  uWS::TemplatedApp<false> app = uWS::App();
+  //hello
+  app.get("/hello", hello_action);
+  //echo
+  app.ws<std::string>("/echo", {.message = ws_echo_handler});
+  //only_save_audio
+  app.ws<std::string>("/paddlespeech/streaming/save", {.open=[](auto *ws) {
+    // init user data
+    auto *userData = (std::string *) ws->getUserData();
+    *userData = "Create User Id";  // set user data
+  }, .message = ws_save_handler});
+  //streaming asr
+  app.ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler});
+  //listen
+  app.listen(port, started_handler).run();
 }

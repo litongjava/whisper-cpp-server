@@ -26,7 +26,7 @@ target_link_libraries(stream_local whisper SDL2::SDL2-static SampleRate::sampler
 
 add_executable(whisper_http_server_base_httplib whisper_http_server_base_httplib.cpp
         common/common.cpp common/utils.cpp handler/inference_handler.cpp params/whisper_params.cpp
-        common/common-m4a.cpp)
+        common/common-m4a.cpp handler/ws_save_handler.h)
 target_include_directories(whisper_http_server_base_httplib PRIVATE ${FFMPEG_INCLUDE_DIRS})
 target_link_directories(whisper_http_server_base_httplib PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(whisper_http_server_base_httplib PRIVATE whisper SampleRate::samplerate ${FFMPEG_LIBRARIES} httplib::httplib nlohmann_json::nlohmann_json dr_lib_header-only)
