@@ -47,6 +47,7 @@ jobs:
             cmake-build-release-linux/simplest
             cmake-build-release-linux/whisper_http_server_base_httplib
             cmake-build-release-linux/whisper_server_base_on_uwebsockets
+            cmake-build-release-linux/thirdparty/whisper.cpp/libwhisper.so
   
 
   build_macos:
