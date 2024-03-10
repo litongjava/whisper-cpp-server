@@ -47,7 +47,7 @@ struct whisper_params {
   bool log_score = false;
   bool use_gpu = true;
 
-  std::string language = "en";
+  std::string language = "auto";
   std::string prompt = "";
   std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
   std::string model = "../models/ggml-base.en.bin";
