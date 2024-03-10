@@ -1,14 +1,17 @@
-#include "nlohmann/json.hpp"
-#include "stream/stream_components_service.h"
-#include "stream/stream_components.h"
-#include "common/utils.h"
-#include "common/common.h"
 #include <uwebsockets/App.h>
 #include <iostream>
 #include <string>
 #include <whisper.h>
 #include <sstream>
 #include <speex/speex_preprocess.h>
+
+#include "nlohmann/json.hpp"
+#include "stream/stream_components_service.h"
+#include "stream/stream_components.h"
+#include "common/utils.h"
+#include "common/common.h"
+#include "handler/hello_handler.h"
+#include "handler/echo_handler.h"
 
 using namespace stream_components;
 
@@ -50,15 +53,7 @@ int main(int argc, char **argv) {
     }
   };
 
-  // HTTP GET /hello handler
-  auto hello_action = [](auto *res, auto *req) {
-    res->end("Hello World!");
-  };
 
-  // WebSocket /echo handler
-  auto ws_echo_handler = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
-    ws->send(message, opCode);
-  };
   //Save Audio
   auto ws_save_handler = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
     auto *userData = (std::string *) ws->getUserData();
@@ -361,9 +356,9 @@ int main(int argc, char **argv) {
     .ws<std::string>("/echo", {.message = ws_echo_handler})
       //only_save_audio
     .ws<std::string>("/paddlespeech/streaming/save", {.open=[](auto *ws) {
-      // 初始化用户数据
+      // init user data
       auto *userData = (std::string *) ws->getUserData();
-      *userData = "Create User Id";  // 设置初始值
+      *userData = "Create User Id";  // set user data
     }, .message = ws_save_handler})
       //streaming asr
     .ws<std::string>("/paddlespeech/asr/streaming", {.message = ws_streaming_handler})

@@ -33,7 +33,7 @@ target_link_libraries(whisper_http_server_base_httplib PRIVATE whisper SampleRat
 
 
 add_executable(whisper_server_base_on_uwebsockets whisper_server_base_on_uwebsockets.cpp common/common.cpp
-        stream/stream_components_service.cpp common/utils.cpp)
+        stream/stream_components_service.cpp common/utils.cpp handler/hello_handler.cpp)
 #add uwebsockets head files
 target_include_directories(whisper_server_base_on_uwebsockets PRIVATE ${UWEBSOCKETS_INCLUDE_DIRS})
 # linked uWebSockets、zlib、libuv 和 uSockets libs
