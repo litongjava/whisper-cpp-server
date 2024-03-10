@@ -16,6 +16,9 @@ https://github.com/litongjava/whisper-cpp-server/assets/31761981/ba7268fa-312c-4
 ## How to build it 
 build with cmake and vcpkg
 ```
+git clone https://github.com/litongjava/whisper-cpp-server.git
+git submodule init
+git submodule update
 cmake -B cmake-build-release
 cmake --build cmake-build-release --config Release -- -j 12
 cp ./ggml-metal.metal cmake-build-release 
