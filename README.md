@@ -46,7 +46,8 @@ cp ./ggml-metal.metal bin
 cp ./cmake-build-release/simplest bin
 cp ./cmake-build-release/whisper_http_server_base_httplib bin 
 cp ./cmake-build-release/whisper_server_base_on_uwebsockets bin
-```]()
+```
+
 ## simplest
 ```shell
 cmake-build-debug/simplest -m models/ggml-base.en.bin samples/jfk.wav
