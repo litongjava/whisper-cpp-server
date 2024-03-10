@@ -37,6 +37,17 @@ jobs:
         with:
           name: cmake-build-release-ubuntu-latest
           path: cmake-build-release-linux/
+      
+      - name: Archive Build binary Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: whisper-cpp-server-ubuntu-latest
+          path: |
+            ggml-metal.metal
+            cmake-build-release-linux/simplest
+            cmake-build-release-linux/whisper_http_server_base_httplib
+            cmake-build-release-linux/whisper_server_base_on_uwebsockets
+  
 
   build_macos:
     runs-on: macos-latest
