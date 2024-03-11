@@ -6,9 +6,17 @@ test
 ```
 docker run --rm \
   -v "$(pwd)/models":/models \
-  -v "$(pwd)/jfk.wav":/jfk.wav \
+  -v "$(pwd)/samples/jfk.wav":/jfk.wav \
   litongjava/whisper-cpp-server:1.0.0 /app/simplest -m /models/ggml-base.en.bin /jfk.wav
 ```
+
+docker run --rm \
+  -v "$(pwd)/models":/models \
+  -v "$(pwd)/samples/zh.wav":/zh.wav \
+  litongjava/whisper-cpp-server:1.0.0 /app/simplest -m /models/ggml-base.en.bin /zh.wav
+```
+
+
 log
 ```
 root@ping-Inspiron-3458:~/code/whisper-cpp-server# docker run --rm \
