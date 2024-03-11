@@ -133,3 +133,34 @@ start server
 ```
 Test server
 see python [client](client)
+
+## Docker
+### run whisper-cpp-server:1.0.0
+[Dockerfile](./distribute/docker/pure/)
+```
+docker run -dit --name=whisper-server -p 8080:8080 -v "$(pwd)/models/ggml-base.en.bin":/models/ggml-base.en.bin litongjava/whisper-cpp-server:1.0.0 /app/whisper_http_server_base_httplib -m /models/ggml-base.en.bin
+```
+the port is 8080
+### test
+```
+curl --location --request POST 'http://127.0.0.1:8080/inference' \
+--header 'Accept: */*' \
+--header 'Content-Type: multipart/form-data; boundary=--------------------------671827497522367123871197' \
+--form 'file=@"E:\\code\\cpp\\cpp-study\\cpp-study-clion\\audio\\jfk.wav"' \
+--form 'temperature="0.2"' \
+--form 'response-format="json"' \
+--form 'audio_format="wav"'
+```
+### run whisper-cpp-server:1.0.0-base-en
+[Dockerfile](./distribute/docker/base.en/)
+```
+docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-base-en
+```
+
+### run whisper-cpp-server:1.0.0-large-v3
+[Dockerfile](./distribute/docker/large-v3/)
+```
+docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-large-v3
+```
+
+### [Client code](./doc/client_code.md)

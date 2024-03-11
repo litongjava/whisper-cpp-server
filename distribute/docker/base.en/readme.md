@@ -3,5 +3,5 @@ docker build -t litongjava/whisper-cpp-server:1.0.0-base-en -f distribute/docker
 ```
 
 ```
-docker run --net=host --rm litongjava/whisper-cpp-server:1.0.0-base-en
+docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-base-en
 ```
