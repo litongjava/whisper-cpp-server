@@ -1,7 +1,9 @@
 # whisper-cpp service
-## Real-time speech  
-Real-time speech recognition and display of recognition results in the browser
-backend
+
+## Whisper-CPP-Server Introduction
+Whisper-CPP-Server is a high-performance speech recognition service written in C++, designed to provide developers and enterprises with a reliable and efficient speech-to-text inference engine. This project implements technology from ggml to perform inference on the open-source Whisper model. While ensuring speed and accuracy, it supports pure CPU-based inference operations, allowing for high-quality speech recognition services without the need for specialized hardware accelerators.
+
+Real-time speech recognition and display of recognition results in the browser backend
 ```
 https://github.com/litongjava/whisper-cpp-server
 ```
@@ -12,6 +14,36 @@ https://github.com/litongjava/listen-know-web
 Test video  
 
 https://github.com/litongjava/whisper-cpp-server/assets/31761981/ba7268fa-312c-47b2-a538-804b96bb656f
+
+
+## Main Features
+1.Pure C++ Inference Engine
+Whisper-CPP-Server is entirely written in C++, leveraging the efficiency of C++ for rapid processing of vast amounts of voice data, even in environments that only have CPUs for computing power.
+
+2.High Performance
+Thanks to the computational efficiency of C++, Whisper-CPP-Server can offer exceptionally high processing speeds, meeting real-time or near-real-time speech recognition demands. It is especially suited for scenarios that require processing large volumes of voice data.
+
+3.Support for Multiple Languages
+The service supports speech recognition in multiple languages, broadening its applicability across various linguistic contexts.
+
+4.Docker Container Support
+A Docker image is provided, enabling quick deployment of the service through simple command-line operations, significantly simplifying installation and configuration processes. Deploy using the following command:
+```
+docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-large-v3
+```
+This means you can run Whisper-CPP-Server on any platform that supports Docker, including but not limited to Linux, Windows, and macOS.
+
+4.Easy Integration for Clients
+Detailed client integration documentation is provided, helping developers quickly incorporate speech recognition functionality into their applications.
+[Client Code Documentation](https://github.com/litongjava/whisper-cpp-server/blob/main/doc/client_code.md)
+
+## Applicable Scenarios
+Whisper-CPP-Server is suitable for a variety of applications that require fast and accurate speech recognition, including but not limited to:
+
+- Voice-driven interactive applications
+- Transcription of meeting records
+- Automatic subtitle generation
+- Automatic translation of multi-language content
 
 ## How to build it 
 build with cmake and vcpkg
