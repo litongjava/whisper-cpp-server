@@ -1,32 +1,41 @@
 {
-  "name" : "whisper-cpp-server",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "0c20b2a97c390e106150837042d921b0939e7ecb",
-  "dependencies" : [ {
-    "name" : "sdl2",
-    "version>=" : "2.28.4#1",
-    "$comment" : "    find_package(SDL2 CONFIG REQUIRED)\n\n    target_link_libraries(main\n\n        PRIVATE\n\n        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>\n\n        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>\n\n    )\n"
-  }, {
-    "name" : "uwebsockets",
-    "version>=" : "20.47.0"
-  }, {
-    "name" : "libsamplerate",
-    "version>=" : "0.2.2#1",
-    "$comment" : "  # this is heuristically generated, and may not be correct\n\n  find_package(SampleRate CONFIG REQUIRED)\n\n  target_link_libraries(main PRIVATE SampleRate::samplerate)\n"
-  }, {
-    "name" : "ffmpeg",
-    "version>=" : "6.1"
-  }, {
-    "name" : "speexdsp",
-    "version>=" : "1.2.1#1"
-  }, {
-    "name" : "cpp-httplib",
-    "version>=" : "0.14.1"
-  }, {
-    "name" : "nlohmann-json",
-    "version>=" : "3.11.2"
-  }, {
-    "name" : "libuv",
-    "version>=" : "1.46.0"
-  } ]
+  "name": "whisper-cpp-server",
+  "version-string": "1.0.0",
+  "builtin-baseline": "0c20b2a97c390e106150837042d921b0939e7ecb",
+  "dependencies": [
+    {
+      "name": "sdl2",
+      "version>=": "2.28.4#1",
+      "$comment": "    find_package(SDL2 CONFIG REQUIRED)\n\n    target_link_libraries(main\n\n        PRIVATE\n\n        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>\n\n        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>\n\n    )\n"
+    },
+    {
+      "name": "uwebsockets",
+      "version>=": "20.47.0"
+    },
+    {
+      "name": "libsamplerate",
+      "version>=": "0.2.2#1",
+      "$comment": "  # this is heuristically generated, and may not be correct\n\n  find_package(SampleRate CONFIG REQUIRED)\n\n  target_link_libraries(main PRIVATE SampleRate::samplerate)\n"
+    },
+    {
+      "name": "ffmpeg",
+      "version>=": "6.1"
+    },
+    {
+      "name": "speexdsp",
+      "version>=": "1.2.1#1"
+    },
+    {
+      "name": "cpp-httplib",
+      "version>=": "0.14.1"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2"
+    },
+    {
+      "name": "libuv",
+      "version>=": "1.46.0"
+    }
+  ]
 }
