@@ -194,5 +194,10 @@ docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server
 ```
 docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-large-v3
 ```
-
-### [Client code](./doc/client_code.md)
+## run whisper-cpp-server:1.0.0-tiny.en-q5_1
+[Dockerfile](./distribute/docker/tiny.en-q5_1/)
+```
+docker run -dit --name whisper-server -p 8080:8080 litongjava/whisper-cpp-server:1.0.0-tiny.en-q5_1
+```
+### Client code
+[Client code](./doc/client_code.md)
