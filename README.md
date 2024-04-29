@@ -1,5 +1,7 @@
 # whisper-cpp service
-
+## open sourde address
+[github](https://github.com/ppnt/whisper-cpp-server)
+[gitee](https://github.com/litongjava/whisper-cpp-server)
 ## Whisper-CPP-Server Introduction
 Whisper-CPP-Server is a high-performance speech recognition service written in C++, designed to provide developers and enterprises with a reliable and efficient speech-to-text inference engine. This project implements technology from ggml to perform inference on the open-source Whisper model. While ensuring speed and accuracy, it supports pure CPU-based inference operations, allowing for high-quality speech recognition services without the need for specialized hardware accelerators.
 
