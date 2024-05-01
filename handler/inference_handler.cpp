@@ -10,13 +10,13 @@ using json = nlohmann::json;
 struct whisper_print_user_data {
   const whisper_params *params;
 
-  const std::vector <std::vector<float>> *pcmf32s;
+  const std::vector<std::vector<float>> *pcmf32s;
   int progress_prev;
 };
 
 // Terminal color map. 10 colors grouped in ranges [0.0, 0.1, ..., 0.9]
 // Lowest is red, middle is yellow, highest is green.
-const std::vector <std::string> k_colors = {
+const std::vector<std::string> k_colors = {
   "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;220m",
   "\033[38;5;226m", "\033[38;5;190m", "\033[38;5;154m", "\033[38;5;118m", "\033[38;5;82m",
 };
@@ -27,7 +27,7 @@ int timestamp_to_sample(int64_t t, int n_samples) {
 }
 
 std::string
-estimate_diarization_speaker(std::vector <std::vector<float>> pcmf32s, int64_t t0, int64_t t1, bool id_only = false) {
+estimate_diarization_speaker(std::vector<std::vector<float>> pcmf32s, int64_t t0, int64_t t1, bool id_only = false) {
   std::string speaker = "";
   const int64_t n_samples = pcmf32s[0].size();
 
@@ -132,7 +132,7 @@ void whisper_print_segment_callback(struct whisper_context *ctx, struct whisper_
 }
 
 std::string
-output_str(struct whisper_context *ctx, const whisper_params &params, std::vector <std::vector<float>> pcmf32s) {
+output_str(struct whisper_context *ctx, const whisper_params &params, std::vector<std::vector<float>> pcmf32s) {
   std::stringstream result;
   const int n_segments = whisper_full_n_segments(ctx);
   for (int i = 0; i < n_segments; ++i) {
@@ -199,7 +199,7 @@ void getReqParameters(const Request &req, whisper_params &params) {
 }
 
 bool read_audio_file(std::string audio_format, std::string filename, std::vector<float> &pcmf32,
-                     std::vector <std::vector<float>> &pcmf32s, bool diarize) {
+                     std::vector<std::vector<float>> &pcmf32s, bool diarize) {
 
   // read audio content into pcmf32
   if (audio_format == "mp3") {
@@ -222,7 +222,7 @@ bool read_audio_file(std::string audio_format, std::string filename, std::vector
 }
 
 bool run(std::mutex &whisper_mutex, whisper_params &params, whisper_context *ctx, std::string filename,
-         const std::vector <std::vector<float>> &pcmf32s, std::vector<float> pcmf32) {
+         const std::vector<std::vector<float>> &pcmf32s, std::vector<float> pcmf32) {
   // print system information
   {
     fprintf(stderr, "\n");
@@ -372,7 +372,7 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
 
   // audio arrays
   std::vector<float> pcmf32;               // mono-channel F32 PCM
-  std::vector <std::vector<float>> pcmf32s; // stereo-channel F32 PCM
+  std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
 
   // write file to temporary file
   std::ofstream temp_file{filename, std::ios::binary};
