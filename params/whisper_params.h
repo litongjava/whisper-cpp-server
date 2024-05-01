@@ -46,6 +46,7 @@ struct whisper_params {
   bool no_timestamps = false;
   bool log_score = false;
   bool use_gpu = true;
+  bool stream = false;
 
   std::string language = "auto";
   std::string prompt = "";

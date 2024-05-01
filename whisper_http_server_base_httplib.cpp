@@ -68,6 +68,9 @@ int main(int argc, char **argv) {
   svr.Post("/inference", [&](const httplib::Request &req, httplib::Response &res) {
     handleInference(req, res, whisper_mutex, params, ctx, argv[0]);
   });
+  svr.Post("/events", [&](const httplib::Request &req, httplib::Response &res) {
+    handle_events(req, res, whisper_mutex, params, ctx, argv[0]);
+  });
   svr.Post("/load", [&](const Request &req, Response &res) {
     whisper_mutex.lock();
     if (!req.has_file("model")) {

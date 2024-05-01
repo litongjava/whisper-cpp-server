@@ -10,14 +10,13 @@ using json = nlohmann::json;
 struct whisper_print_user_data {
   const whisper_params *params;
 
-  const std::vector<std::vector<float>> *pcmf32s;
+  const std::vector <std::vector<float>> *pcmf32s;
   int progress_prev;
 };
 
-
 // Terminal color map. 10 colors grouped in ranges [0.0, 0.1, ..., 0.9]
 // Lowest is red, middle is yellow, highest is green.
-const std::vector<std::string> k_colors = {
+const std::vector <std::string> k_colors = {
   "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;220m",
   "\033[38;5;226m", "\033[38;5;190m", "\033[38;5;154m", "\033[38;5;118m", "\033[38;5;82m",
 };
@@ -28,7 +27,7 @@ int timestamp_to_sample(int64_t t, int n_samples) {
 }
 
 std::string
-estimate_diarization_speaker(std::vector<std::vector<float>> pcmf32s, int64_t t0, int64_t t1, bool id_only = false) {
+estimate_diarization_speaker(std::vector <std::vector<float>> pcmf32s, int64_t t0, int64_t t1, bool id_only = false) {
   std::string speaker = "";
   const int64_t n_samples = pcmf32s[0].size();
 
@@ -133,7 +132,7 @@ void whisper_print_segment_callback(struct whisper_context *ctx, struct whisper_
 }
 
 std::string
-output_str(struct whisper_context *ctx, const whisper_params &params, std::vector<std::vector<float>> pcmf32s) {
+output_str(struct whisper_context *ctx, const whisper_params &params, std::vector <std::vector<float>> pcmf32s) {
   std::stringstream result;
   const int n_segments = whisper_full_n_segments(ctx);
   for (int i = 0; i < n_segments; ++i) {
@@ -163,7 +162,7 @@ void whisper_print_progress_callback(struct whisper_context * /*ctx*/, struct wh
 }
 
 void getReqParameters(const Request &req, whisper_params &params) {
-// user model configu.has_fileion
+  // user model configu.has_fileion
   if (req.has_file("offset-t")) {
     params.offset_t_ms = std::stoi(req.get_file_value("offset-t").content);
   }
@@ -185,16 +184,22 @@ void getReqParameters(const Request &req, whisper_params &params) {
   if (req.has_file("temerature")) {
     params.userdef_temp = std::stof(req.get_file_value("temperature").content);
   }
-  if (req.has_file("audio_format")) {
-    params.audio_format = req.get_file_value("audio_format").content;
+  if (req.has_file("audio-format")) {
+    params.audio_format = req.get_file_value("audio-format").content;
+  }
+  if (req.has_file("language")) {
+    params.language = req.get_file_value("language").content;
+  }
+  if (req.has_file("diarize")) {
+    params.diarize = true;
+  }
+  if (req.has_file("translate")) {
+    params.translate = true
   }
 }
 
-
-void getReqParameters(const Request &request, whisper_params &params);
-
 bool read_audio_file(std::string audio_format, std::string filename, std::vector<float> &pcmf32,
-                     std::vector<std::vector<float>> &pcmf32s, bool diarize) {
+                     std::vector <std::vector<float>> &pcmf32s, bool diarize) {
 
   // read audio content into pcmf32
   if (audio_format == "mp3") {
@@ -217,7 +222,7 @@ bool read_audio_file(std::string audio_format, std::string filename, std::vector
 }
 
 bool run(std::mutex &whisper_mutex, whisper_params &params, whisper_context *ctx, std::string filename,
-         const std::vector<std::vector<float>> &pcmf32s, std::vector<float> pcmf32) {
+         const std::vector <std::vector<float>> &pcmf32s, std::vector<float> pcmf32) {
   // print system information
   {
     fprintf(stderr, "\n");
@@ -367,13 +372,17 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
 
   // audio arrays
   std::vector<float> pcmf32;               // mono-channel F32 PCM
-  std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
+  std::vector <std::vector<float>> pcmf32s; // stereo-channel F32 PCM
 
   // write file to temporary file
   std::ofstream temp_file{filename, std::ios::binary};
   temp_file << audio_file.content;
 
   bool isOK = read_audio_file(params.audio_format, filename, pcmf32, pcmf32s, params.diarize);
+
+  // remove temp file
+  std::remove(filename.c_str());
+
   if (!isOK) {
     json json_obj = {
       {"code", -1},
@@ -384,9 +393,6 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     return;
   }
 
-  // remove temp file
-  std::remove(filename.c_str());
-
   printf("Successfully loaded %s\n", filename.c_str());
 
   bool isOk = run(whisper_mutex, params, ctx, filename, pcmf32s, pcmf32);
@@ -395,8 +401,7 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     if (params.response_format == text_format) {
       std::string results = output_str(ctx, params, pcmf32s);
       response.set_content(results.c_str(), "text/html");
-    }
-    else {
+    } else {
       auto results = get_result(ctx);
       json jres = json{
         {"code", 1},
@@ -413,4 +418,32 @@ void handleInference(const Request &request, Response &response, std::mutex &whi
     auto json_string = jres.dump(-1, ' ', false, json::error_handler_t::replace);
     response.set_content(json_string, "application/json");
   }
+}
+
+void handle_events(const Request &request, Response &response, std::mutex &whisper_mutex, whisper_params &params,
+                   whisper_context *ctx, char *arg_audio_file) {
+  // set CORS hander
+  response.set_header("Access-Control-Allow-Origin", "*");
+  response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  response.set_header("Access-Control-Allow-Headers", "Content-Type");
+  // first check user requested fields of the request
+  if (!request.has_file("file")) {
+    fprintf(stderr, "error: no 'file' field in the request\n");
+    json jres = json{
+      {"code", -1},
+      {"msg",  "no 'file' field in the request"}
+    };
+    auto json_string = jres.dump(-1, ' ', false, json::error_handler_t::replace);
+    response.set_content(json_string, "application/json");
+    return;
+  }
+  auto audio_file = request.get_file_value("file");
+  std::string filename{audio_file.filename};
+  printf("%s: Received filename: %s \n", get_current_time().c_str(), filename.c_str());
+  // check non-required fields
+  getReqParameters(request, params);
+  params.stream = true
+  printf("%s: audio_format:%s \n", get_current_time().c_str(), params.audio_format.c_str());
+  std::unique_lock<std::mutex> lock(queue_mutex);
+
 }
