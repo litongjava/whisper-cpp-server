@@ -54,8 +54,8 @@ git clone https://github.com/litongjava/whisper-cpp-server.git
 git submodule init
 git submodule update
 cmake -B cmake-build-release
-cmake --build cmake-build-release --config Release -- -j 12
 cp ./ggml-metal.metal cmake-build-release 
+cmake --build cmake-build-release --config Release -- -j 12
 ```
 
 run with simplest
