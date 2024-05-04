@@ -57,6 +57,10 @@ cmake -B cmake-build-release
 cp ./ggml-metal.metal cmake-build-release 
 cmake --build cmake-build-release --config Release -- -j 12
 ```
+macos
+```shell
+cmake -B cmake-build-release -DWHISPER_COREML=1
+```
 
 run with simplest
 ```
