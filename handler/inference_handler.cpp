@@ -194,7 +194,7 @@ void getReqParameters(const Request &req, whisper_params &params) {
     params.diarize = true;
   }
   if (req.has_file("translate")) {
-    params.translate = true
+    params.translate = true;
   }
 }
 
@@ -442,8 +442,6 @@ void handle_events(const Request &request, Response &response, std::mutex &whisp
   printf("%s: Received filename: %s \n", get_current_time().c_str(), filename.c_str());
   // check non-required fields
   getReqParameters(request, params);
-  params.stream = true
+  params.stream = true;
   printf("%s: audio_format:%s \n", get_current_time().c_str(), params.audio_format.c_str());
-  std::unique_lock<std::mutex> lock(queue_mutex);
-
 }
